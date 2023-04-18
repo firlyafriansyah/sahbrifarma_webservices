@@ -2,7 +2,6 @@ const { AdministrationAccount, Logs } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
-  const administrationAccountFromHeaders = req.headers.administration_account;
   const { uid } = req.params;
 
   const administrationAccount = await AdministrationAccount.findOne({
@@ -11,7 +10,7 @@ module.exports = async (req, res) => {
 
   if (!administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(administrationAccountFromHeaders),
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Logout',
       status: 'error',
       message: `Administration account with this uid not found! (target: ${uid})`,
@@ -25,7 +24,7 @@ module.exports = async (req, res) => {
 
   if (!administrationAccount.loggedIn) {
     await Logs.create({
-      administrationAccount: Decryptor(administrationAccountFromHeaders),
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Logout',
       status: 'error',
       message: `This administration account is'nt logged in on any device! (target: ${uid})`,
@@ -43,7 +42,7 @@ module.exports = async (req, res) => {
 
   if (!updateAdministrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(administrationAccountFromHeaders),
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Logout',
       status: 'error',
       message: `Update administration account logged in failed! (target: ${uid})`,
@@ -56,7 +55,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(administrationAccountFromHeaders),
+    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
     action: 'Logout',
     status: 'success',
     message: `Logout from this administration account success! (target: ${uid})`,

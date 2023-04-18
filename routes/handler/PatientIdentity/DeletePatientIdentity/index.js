@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
     patientIdentity, allergies, anamnesis, diagnosis, medicalTest, medicine,
   ]).catch(async () => {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Deleted Patient Identity',
       status: 'error',
       message: `Patient with this uid not found! (target: ${uid})`,
@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
     diagnosisDestroy, medicalTestDestroy, medicineDestroy,
   ]).then(async () => {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Deleted Patient Identity',
       status: 'success',
       message: `Patient identity successfully deleted! (target: ${uid})`,
@@ -70,7 +70,7 @@ module.exports = async (req, res) => {
     });
   }).catch(async () => {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Deleted Patient Identity',
       status: 'error',
       message: `Patient identity deleted failed! (target: ${uid})`,

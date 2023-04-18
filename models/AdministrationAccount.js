@@ -24,6 +24,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
     },
+    status: {
+      type: DataTypes.ENUM,
+      values: ['active', 'inactive'],
+      allowNull: false,
+    },
+    lastUpdate: {
+      field: 'last_update',
+      type: DataTypes.DATE,
+    },
     createdAt: {
       field: 'created_at',
       type: DataTypes.DATE,

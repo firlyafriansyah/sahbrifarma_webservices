@@ -1,18 +1,20 @@
-'use strict';
 const bcrypt = require('bcrypt');
 
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    await queryInterface.bulkInsert('admin', [{
-      username: 'admin',
-      password: await bcrypt.hash('admin123', 10),
-      role: 0,
+  async up(queryInterface) {
+    await queryInterface.bulkInsert('administration_account', [{
+      username: 'super-admin',
+      password: await bcrypt.hash('superadmin123', 10),
+      role: 'super-admin',
+      logged_in: true,
+      status: 'active',
+      last_update: new Date(),
       created_at: new Date(),
       updated_at: new Date(),
-      }]);
+    }]);
   },
 
-  async down (queryInterface, Sequelize) {
-    await queryInterface.bulkDelete('admin', null, {});
-  }
+  async down(queryInterface) {
+    await queryInterface.bulkDelete('administration_account', null, {});
+  },
 };

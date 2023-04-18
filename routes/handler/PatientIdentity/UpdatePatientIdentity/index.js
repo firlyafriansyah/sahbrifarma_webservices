@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
 
   if (!patientIdentity) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Update Patient Identity',
       status: 'error',
       message: `Patient with this uid not found! (target: ${uid})`,
@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
 
   if (!updatePatientIdentity) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Update Patient Identity',
       status: 'error',
       message: `Update patient identity failed! (target: ${uid})`,
@@ -70,7 +70,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.administration_account),
+    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
     action: 'Update Patient Identity',
     status: 'error',
     message: `Patient identity successfully updated! (target: ${uid})`,

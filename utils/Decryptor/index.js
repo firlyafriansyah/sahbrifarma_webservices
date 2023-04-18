@@ -7,7 +7,13 @@ const Decryptor = (text) => {
     const bytes = CryptoJS.AES.decrypt(text, passphrase);
     const textResult = bytes.toString(CryptoJS.enc.Utf8);
 
-    return textResult;
+    const Head = textResult.split('?')[0];
+    const Tail = textResult.split('?')[1];
+
+    return {
+      Head,
+      Tail,
+    };
   }
   return 'Guest';
 };

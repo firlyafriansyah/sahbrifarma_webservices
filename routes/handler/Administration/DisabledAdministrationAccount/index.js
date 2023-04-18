@@ -6,13 +6,12 @@ module.exports = async (req, res) => {
 
   const administrationAccount = await AdministrationAccount.findOne({
     where: { uid },
-    attributes: ['username', 'role', ['updated_at', 'updatedAt'], ['last_update', 'lastUpdate']],
   });
 
   if (!administrationAccount) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Get Administration Account',
+      action: 'Disabled Administration Account',
       status: 'error',
       message: `Administration account not found! (target: ${uid})`,
     });
@@ -23,15 +22,33 @@ module.exports = async (req, res) => {
     });
   }
 
+  const disabledAdministrationAccount = await administrationAccount.update({
+    status: 'inactive',
+  });
+
+  if (!disabledAdministrationAccount) {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      action: 'Disabled Administration Account',
+      status: 'error',
+      message: `Disabled administration account failed! (target: ${uid})`,
+    });
+
+    return res.status(403).json({
+      status: 'error',
+      message: 'Disabled administration account failed!',
+    });
+  }
+
   await Logs.create({
     administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-    action: 'Get Administration Account',
+    action: 'Disabled Administration Account',
     status: 'success',
-    message: `Get administration account success! (target: ${uid})`,
+    message: `Administration account succesfully disabled! (target: ${uid})`,
   });
 
   return res.json({
     status: 'success',
-    data: administrationAccount,
+    message: 'Administration account succesfully disabled!',
   });
 };
