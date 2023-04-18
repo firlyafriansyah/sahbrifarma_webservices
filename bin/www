@@ -15,10 +15,10 @@ const http = require('http');
 const port = normalizePort(process.env.PORT || '3008');
 
 // #THIS FOR HEROKU PRODUCTION CCONFIGURATION
-// app.set('port', port);
+app.set('port', port);
 
 // #THIS FOR LOCAL DEVELOPMENT
-console.log('listen on port: ', port);
+// console.log('listen on port: ', port);
 
 /**
  * Create HTTP server.
