@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
 
   if (!queue) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head,
       action: `Update Queue With Patient Uid: ${uidPatient}`,
       status: 'error',
       message: `Patient with patient uid: ${uidPatient} not found!`,
@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
 
   if (!updateQueue) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head,
       action: 'Update Patient Queue Status',
       status: 'error',
       message: `Patient queue failed updated! (target: ${uidPatient})`,
@@ -41,7 +41,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.administration_account),
+    administrationAccount: Decryptor(req.headers.authorization).Head,
     action: 'Update Patient Queue Status',
     status: 'success',
     message: `Update patient queue status successfull! (target: ${uidPatient})`,

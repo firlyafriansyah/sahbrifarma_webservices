@@ -1,26 +1,11 @@
-const bcrypt = require('bcrypt');
-const Validator = require('fastest-validator');
-const { AdministrationAccount, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
-
-const v = new Validator();
+const { Decryptor } = require("../../../../utils");
 
 module.exports = async (req, res) => {
-  const schema = {
-    username: 'string|empty:false',
-    password: 'string|min:6',
-  };
-
-  const validate = v.validate(req.body, schema);
-  if (validate.length) {
-    return res.status(400).json({
-      status: 'error',
-      message: validate,
-    });
-  }
+  const { Authentication } = req.headers;
+  const { Head, Tail } = Decryptor(Authentication)
 
   const administrationAccount = await AdministrationAccount.findOne({
-    where: { username: req.body.username },
+    where: { username: Head },
   });
 
   if (!administrationAccount) {
@@ -28,7 +13,7 @@ module.exports = async (req, res) => {
       administrationAccount: Decryptor(req.headers.authorization).Head,
       action: 'Login',
       status: 'error',
-      message: `Administration account not found! (target: ${req.body.username})`,
+      message: `Administration account not found! (target: ${Head})`,
     });
 
     return res.status(404).json({
@@ -37,14 +22,14 @@ module.exports = async (req, res) => {
     });
   }
 
-  const isValidPassword = await bcrypt.compare(req.body.password, administrationAccount.password);
+  const isValidPassword = await bcrypt.compare(Tail, administrationAccount.password);
 
   if (!isValidPassword) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head,
       action: 'Login',
       status: 'error',
-      message: `Password not match with this account! (target: ${req.body.username})`,
+      message: `Password not match with this account! (target: ${Head})`,
     });
 
     return res.status(404).json({
@@ -58,7 +43,7 @@ module.exports = async (req, res) => {
       administrationAccount: Decryptor(req.headers.authorization).Head,
       action: 'Login',
       status: 'error',
-      message: `This account already logged in on another device! (target: ${req.body.username})`,
+      message: `This account already logged in on another device! (target: ${Head})`,
     });
 
     return res.status(404).json({
@@ -75,7 +60,7 @@ module.exports = async (req, res) => {
     administrationAccount: Decryptor(req.headers.authorization).Head,
     action: 'Login',
     status: 'success',
-    message: `Login success! (target: ${req.body.username})`,
+    message: `Login success! (target: ${Head})`,
   });
 
   return res.json({
@@ -85,4 +70,4 @@ module.exports = async (req, res) => {
       role: administrationAccount.role,
     },
   });
-};
+}

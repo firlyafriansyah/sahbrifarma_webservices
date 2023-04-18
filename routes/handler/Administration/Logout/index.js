@@ -2,7 +2,7 @@ const { AdministrationAccount, Logs } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
-  const administrationAccountFromHeaders = req.headers.administration_account;
+  const administrationAccountFromHeaders = req.headers.Authorization;
   const { uid } = req.params;
 
   const administrationAccount = await AdministrationAccount.findOne({

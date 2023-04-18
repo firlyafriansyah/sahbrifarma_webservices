@@ -5,6 +5,7 @@ const Login = require('./Login');
 const Logout = require('./Logout');
 const Register = require('./Register');
 const UpdateAdministrationAccount = require('./UpdateAdministrationAccount');
+const AutoLogin = require('./AutoLogin');
 
 module.exports = {
   DeleteAdministrationAccount,
@@ -14,4 +15,5 @@ module.exports = {
   Logout,
   Register,
   UpdateAdministrationAccount,
+  AutoLogin,
 };

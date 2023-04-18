@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
 
   if (!administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head,
       action: 'Get Administration Account',
       status: 'error',
       message: `Administration account not found! (target: ${uid})`,
@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.administration_account),
+    administrationAccount: Decryptor(req.headers.authorization).Head,
     action: 'Get Administration Account',
     status: 'success',
     message: `Get administration account success! (target: ${uid})`,

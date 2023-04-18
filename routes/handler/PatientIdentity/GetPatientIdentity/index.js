@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
 
   if (!patientIdentity) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head,
       action: 'Get Patient Identity',
       status: 'error',
       message: `Patient with this uid not found! (target: ${uid})`,
@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.administration_account),
+    administrationAccount: Decryptor(req.headers.authorization).Head,
     action: 'Get Patient Identity',
     status: 'success',
     message: `Get patient with this uid success! (target: ${uid})`,

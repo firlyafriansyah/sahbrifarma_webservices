@@ -6,6 +6,7 @@ const administrationHandler = require('./handler/Administration');
 
 router.post('/register', administrationHandler.Register);
 router.post('/login', administrationHandler.Login);
+router.post('/autologin', administrationHandler.AutoLogin);
 router.post('/logout/:uid', administrationHandler.Logout);
 router.get('/', administrationHandler.GetAdministrationAccountList);
 router.get('/detail/:uid', administrationHandler.GetAdministrationAccount);

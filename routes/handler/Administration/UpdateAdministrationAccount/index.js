@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
 
   if (!administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head,
       action: 'Update Administration Account Data',
       status: 'error',
       message: `Administration account not found! (target: ${uid})`,
@@ -46,7 +46,7 @@ module.exports = async (req, res) => {
 
   if (checkName && checkName.username !== administrationAccount.username) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head,
       action: 'Update Administration Account Data',
       status: 'error',
       message: `This username already used! (target: ${uid}`,
@@ -76,7 +76,7 @@ module.exports = async (req, res) => {
 
   if (!updateAdministrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.administration_account),
+      administrationAccount: Decryptor(req.headers.authorization).Head,
       action: 'Update Administration Account Data',
       status: 'error',
       message: `Administration account failed updated! (target: ${uid})`,
@@ -89,7 +89,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.administration_account),
+    administrationAccount: Decryptor(req.headers.authorization).Head,
     action: 'Update Administration Account',
     status: 'success',
     message: `Update administration account successfully updated! (target: ${uid})`,
