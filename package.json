@@ -3,9 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon bin/www",
-    "encrypt": "node EncryptText.js"
+    "start": "node app.js"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
