@@ -20,9 +20,9 @@ app.use('/patient', patientIdentityRouter);
 app.use('/services-connection-test', serviceConnectionTestRouter);
 
 // #THIS FOR HEROKU PRODUCTION CONFIGURATION
-app.listen(process.env.PORT || 3008, () => {
-  // eslint-disable-next-line no-console
-  console.log('Express server listening');
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+  console.log('Express server listening on port', port)
 });
 
 // #THIS FOR LOCAL DEVELOPMENT
