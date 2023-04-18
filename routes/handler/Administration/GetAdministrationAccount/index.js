@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
 
   const administrationAccount = await AdministrationAccount.findOne({
     where: { uid },
-    attributes: ['username', 'role', ['updated_at', 'lastUpdated']],
+    attributes: ['username', 'role', ['updated_at', 'updatedAt'], ['last_update', 'lastUpdate']],
   });
 
   if (!administrationAccount) {
