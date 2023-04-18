@@ -68,7 +68,7 @@ module.exports = async (req, res) => {
     patientIdentity, allergies, anamnesis, diagnosis, medicalTest, medicine,
   ]).then(async () => {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Register Patient Identity',
       status: 'success',
       message: `Patient identity succesfully registered! (target: ${req.body.nama_lengkap})`,
@@ -80,7 +80,7 @@ module.exports = async (req, res) => {
     });
   }).catch(async () => {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Register Patient Identity',
       status: 'error',
       message: `Patient identity registered failed! (target: ${req.body.nama_lengkap})`,

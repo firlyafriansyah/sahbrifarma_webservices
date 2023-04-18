@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
 
   if (!administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Delete Administration Account',
       status: 'error',
       message: `Administration account not found! (target: ${uid})`,
@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
 
   if (!deletedAdministrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Delete Administration Account',
       status: 'error',
       message: `Deleted administration account failed! (target: ${uid})`,
@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head,
+    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
     action: 'Delete Administration Account',
     status: 'success',
     message: `Administration account succesfully deleted! (target: ${uid})`,

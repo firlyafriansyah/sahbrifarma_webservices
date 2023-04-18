@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
 
   if (!getQueueList) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: `Get Queue ${status} List`,
       status: 'error',
       message: `Queue ${status} list not found!`,
@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head,
+    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
     action: `Get Queue ${status} List`,
     status: 'success',
     message: `Get queue ${status} list success!`,

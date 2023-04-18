@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
 
   if (administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Register',
       status: 'error',
       message: `This username already used! (target: ${req.body.username})`,
@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
   });
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head,
+    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
     action: 'Register',
     status: 'success',
     message: `Administration account successfully registered! (target: ${req.body.username})`,

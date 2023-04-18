@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
 
   if (!administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
       message: `Administration account not found! (target: ${Head})`,
@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
 
   if (!isValidPassword) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
       message: `Password not match with this account! (target: ${Head})`,
@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
 
   if (administrationAccount.status === 'inactive') {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
       message: `This account on inactive status! (target: ${Head})`,
@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
 
   if (administrationAccount.loggedIn) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
       message: `This account already logged in on another device! (target: ${Head})`,
@@ -72,7 +72,7 @@ module.exports = async (req, res) => {
 
   if (!updateLastUpdate) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
       message: `Failed update last update on this account! (target: ${Head})`,
@@ -89,7 +89,7 @@ module.exports = async (req, res) => {
   });
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head,
+    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
     action: 'Auto Login',
     status: 'success',
     message: `Login success! (target: ${Head})`,

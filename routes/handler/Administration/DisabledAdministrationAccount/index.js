@@ -1,15 +1,16 @@
-const { AdministrationAccount } = require('../../../../models');
+const { AdministrationAccount, Logs } = require('../../../../models');
+const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
 
   const administrationAccount = await AdministrationAccount.findOne({
-    where: {uid}
-  })
+    where: { uid },
+  });
 
   if (!administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Disabled Administration Account',
       status: 'error',
       message: `Administration account not found! (target: ${uid})`,
@@ -27,7 +28,7 @@ module.exports = async (req, res) => {
 
   if (!disabledAdministrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Disabled Administration Account',
       status: 'error',
       message: `Disabled administration account failed! (target: ${uid})`,
@@ -40,7 +41,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head,
+    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
     action: 'Disabled Administration Account',
     status: 'success',
     message: `Administration account succesfully disabled! (target: ${uid})`,
@@ -50,4 +51,4 @@ module.exports = async (req, res) => {
     status: 'success',
     message: 'Administration account succesfully disabled!',
   });
-}
+};

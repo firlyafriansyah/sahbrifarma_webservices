@@ -6,6 +6,9 @@ module.exports = {
       username: 'super-admin',
       password: await bcrypt.hash('superadmin123', 10),
       role: 'super-admin',
+      logged_in: true,
+      status: 'active',
+      last_update: new Date(),
       created_at: new Date(),
       updated_at: new Date(),
     }]);

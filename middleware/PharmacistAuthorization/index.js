@@ -11,8 +11,8 @@ module.exports = async (req, res, next) => {
 
   if (!administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
-      action: 'Frontdesk Middleware',
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      action: 'Pharmacist Middleware',
       status: 'error',
       message: `Administration account not found! (target: ${Head})`,
     });
@@ -25,8 +25,8 @@ module.exports = async (req, res, next) => {
 
   if (administrationAccount.lastUpdate !== administrationAccount.updatedAt) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
-      action: 'Frontdesk Middleware',
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      action: 'Pharmacist Middleware',
       status: 'error',
       message: `This account recently updated, please re-login! (target: ${Head})`,
     });
@@ -39,8 +39,8 @@ module.exports = async (req, res, next) => {
 
   if (Tail !== 'pharmacist' && Tail !== 'super-admin') {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head,
-      action: 'Frontdesk Middleware',
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      action: 'Pharmacist Middleware',
       status: 'error',
       message: `This account not have authorization for this API endpoint! (target: ${Head})`,
     });
