@@ -45,6 +45,7 @@ module.exports = async (req, res) => {
     password,
     role: req.body.role,
     loggedIn: false,
+    status: 'active'
   });
 
   await Logs.create({

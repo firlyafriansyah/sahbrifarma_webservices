@@ -53,6 +53,20 @@ module.exports = async (req, res) => {
     });
   }
 
+  if (administrationAccount.status === 'inactive') {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head,
+      action: 'Auto Login',
+      status: 'error',
+      message: `This account on inactive status! (target: ${Head})`,
+    });
+
+    return res.status(403).json({
+      status: 'error',
+      message: 'This account on inactive status!',
+    });
+  }
+
   if (administrationAccount.loggedIn) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head,
@@ -64,6 +78,24 @@ module.exports = async (req, res) => {
     return res.status(404).json({
       status: 'error',
       message: 'This account already logged in on another device!',
+    });
+  }
+
+  const updateLastUpdate = await administrationAccount.update({
+    lastUpdate: administrationAccount.updatedAt,
+  })
+
+  if (!updateLastUpdate) {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head,
+      action: 'Login',
+      status: 'error',
+      message: `Failed update last update on this account! (target: ${Head})`,
+    });
+
+    return res.status(409).json({
+      status: 'error',
+      message: 'Failed update last update on this account!!',
     });
   }
 

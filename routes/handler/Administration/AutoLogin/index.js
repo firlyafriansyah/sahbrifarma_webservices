@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
   if (!administrationAccount) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head,
-      action: 'Login',
+      action: 'Auto Login',
       status: 'error',
       message: `Administration account not found! (target: ${Head})`,
     });
@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
   if (!isValidPassword) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head,
-      action: 'Login',
+      action: 'Auto Login',
       status: 'error',
       message: `Password not match with this account! (target: ${Head})`,
     });
@@ -38,10 +38,24 @@ module.exports = async (req, res) => {
     });
   }
 
+  if (administrationAccount.status === 'inactive') {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head,
+      action: 'Auto Login',
+      status: 'error',
+      message: `This account on inactive status! (target: ${Head})`,
+    });
+
+    return res.status(403).json({
+      status: 'error',
+      message: 'This account on inactive status!',
+    });
+  }
+
   if (administrationAccount.loggedIn) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head,
-      action: 'Login',
+      action: 'Auto Login',
       status: 'error',
       message: `This account already logged in on another device! (target: ${Head})`,
     });
@@ -52,13 +66,31 @@ module.exports = async (req, res) => {
     });
   }
 
+  const updateLastUpdate = await administrationAccount.update({
+    lastUpdate: administrationAccount.updatedAt,
+  })
+
+  if (!updateLastUpdate) {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head,
+      action: 'Auto Login',
+      status: 'error',
+      message: `Failed update last update on this account! (target: ${Head})`,
+    });
+
+    return res.status(409).json({
+      status: 'error',
+      message: 'Failed update last update on this account!!',
+    });
+  }
+
   await administrationAccount.update({
     loggedIn: true,
   });
 
   await Logs.create({
     administrationAccount: Decryptor(req.headers.authorization).Head,
-    action: 'Login',
+    action: 'Auto Login',
     status: 'success',
     message: `Login success! (target: ${Head})`,
   });

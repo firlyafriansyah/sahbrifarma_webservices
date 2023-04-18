@@ -12,5 +12,6 @@ router.get('/', administrationHandler.GetAdministrationAccountList);
 router.get('/detail/:uid', administrationHandler.GetAdministrationAccount);
 router.put('/update/:uid', administrationHandler.UpdateAdministrationAccount);
 router.delete('/delete/:uid', administrationHandler.DeleteAdministrationAccount);
+router.put('/disabled/:uid', administrationHandler.DisabledAdministrationAccount);
 
 module.exports = router;

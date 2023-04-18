@@ -24,6 +24,14 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         allowNull: false,
       },
+      status: {
+        type: Sequelize.ENUM,
+        values: ['active', 'inactive'],
+        allowNull: false,
+      },
+      last_update: {
+        type: Sequelize.DATE,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
