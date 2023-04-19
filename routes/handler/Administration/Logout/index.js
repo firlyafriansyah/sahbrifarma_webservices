@@ -1,4 +1,4 @@
-const { AdministrationAccount, Logs } = require('../../../../models');
+const { AdministrationAccount, Logs, LoginStatus } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
@@ -22,7 +22,25 @@ module.exports = async (req, res) => {
     });
   }
 
-  if (!administrationAccount.loggedIn) {
+  const loginStatus = await LoginStatus.findOne({
+    where: { uidAdministrationAccount: administrationAccount.uid },
+  });
+
+  if (!loginStatus) {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      action: 'Logout',
+      status: 'error',
+      message: `Login status for this administration account with this uid not found! (target: ${uid})`,
+    });
+
+    return res.status(404).json({
+      status: 'error',
+      message: 'Login status for this administration account with this uid not found!',
+    });
+  }
+
+  if (!loginStatus.loggedIn) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Logout',
@@ -36,21 +54,21 @@ module.exports = async (req, res) => {
     });
   }
 
-  const updateAdministrationAccount = await administrationAccount.update({
+  const updateLoginStatus = await loginStatus.update({
     loggedIn: false,
   });
 
-  if (!updateAdministrationAccount) {
+  if (!updateLoginStatus) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Logout',
       status: 'error',
-      message: `Update administration account logged in failed! (target: ${uid})`,
+      message: `Update administration account login status failed! (target: ${uid})`,
     });
 
     return res.status(409).json({
       status: 'error',
-      message: 'Update administration account logged in failed!',
+      message: 'Update administration account login status failed!',
     });
   }
 

@@ -20,17 +20,10 @@ module.exports = {
         values: ['super-admin', 'frontdesk', 'nurse', 'doctor', 'pharmacist'],
         allowNull: false,
       },
-      logged_in: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-      },
       status: {
         type: Sequelize.ENUM,
         values: ['active', 'inactive'],
         allowNull: false,
-      },
-      last_update: {
-        type: Sequelize.DATE,
       },
       created_at: {
         type: Sequelize.DATE,

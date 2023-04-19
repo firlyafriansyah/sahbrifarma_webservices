@@ -38,20 +38,6 @@ module.exports = async (req, res, next) => {
     });
   }
 
-  if (administrationAccount.lastUpdate.toString() !== administrationAccount.updatedAt.toString()) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Super Admin Middleware',
-      status: 'error',
-      message: `This account recently updated, please re-login! (target: ${Head})`,
-    });
-
-    return res.status(409).json({
-      status: 'error',
-      message: 'This account recently updated, please re-login!',
-    });
-  }
-
   if (Tail !== 'super-admin') {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
@@ -63,6 +49,34 @@ module.exports = async (req, res, next) => {
     return res.status(401).json({
       status: 'error',
       message: 'This account not have authorization for this API endpoint!',
+    });
+  }
+
+  if (administrationAccount.status === 'inactive') {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      action: 'Super Admin Middleware',
+      status: 'error',
+      message: `This account status is inactive! (target: ${Head})`,
+    });
+
+    return res.status(409).json({
+      status: 'error',
+      message: 'This account status is inactive!',
+    });
+  }
+
+  if (administrationAccount.lastUpdate.toString() !== administrationAccount.updatedAt.toString()) {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      action: 'Super Admin Middleware',
+      status: 'error',
+      message: `This account recently updated, please re-login! (target: ${Head})`,
+    });
+
+    return res.status(409).json({
+      status: 'error',
+      message: 'This account recently updated, please re-login!',
     });
   }
 

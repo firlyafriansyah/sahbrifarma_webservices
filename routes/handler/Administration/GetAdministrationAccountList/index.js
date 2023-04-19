@@ -5,7 +5,7 @@ const { Decryptor } = require('../../../../utils');
 module.exports = async (req, res) => {
   const administrationAccount = await AdministrationAccount.findAll({
     where: { role: { [Op.not]: 'super-admin' } },
-    attributes: ['username', 'role', ['updated_at', 'updatedAt'], ['last_update', 'lastUpdate']],
+    attributes: ['username', 'role', ['updated_at', 'updatedAt']],
   });
 
   if (!administrationAccount) {

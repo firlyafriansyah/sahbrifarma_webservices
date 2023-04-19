@@ -19,19 +19,10 @@ module.exports = (sequelize, DataTypes) => {
       values: ['super-admin', 'frontdesk', 'nurse', 'doctor', 'pharmacist'],
       allowNull: false,
     },
-    loggedIn: {
-      field: 'logged_in',
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-    },
     status: {
       type: DataTypes.ENUM,
       values: ['active', 'inactive'],
       allowNull: false,
-    },
-    lastUpdate: {
-      field: 'last_update',
-      type: DataTypes.DATE,
     },
     createdAt: {
       field: 'created_at',

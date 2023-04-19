@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const Validator = require('fastest-validator');
 const { Decryptor } = require('../../../../utils');
-const { AdministrationAccount, Logs } = require('../../../../models');
+const { AdministrationAccount, Logs, LoginStatus } = require('../../../../models');
 
 const v = new Validator();
 
@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
 
   const validate = v.validate(req.body, schema);
   if (validate.length) {
-    return res.status(400).json({
+    return res.status(403).json({
       status: 'error',
       message: validate,
     });
@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
       message: `This username already used! (target: ${req.body.username})`,
     });
 
-    return res.status(400).json({
+    return res.status(409).json({
       status: 'error',
       message: 'This username already used!',
     });
@@ -44,9 +44,41 @@ module.exports = async (req, res) => {
     username: req.body.username,
     password,
     role: req.body.role,
-    loggedIn: false,
-    status: 'active'
   });
+
+  if (!createAdministrationAccount) {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      action: 'Register',
+      status: 'error',
+      message: `Failed register for this account! (target: ${req.body.username})`,
+    });
+
+    return res.status(409).json({
+      status: 'error',
+      message: 'Failed register for this account!',
+    });
+  }
+
+  const createLoginStatus = await LoginStatus.create({
+    uidAdministrationAccount: administrationAccount.uid,
+    loggedIn: false,
+    status: 'active',
+  });
+
+  if (!createLoginStatus) {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      action: 'Register',
+      status: 'error',
+      message: `Failed create login status for this account! (target: ${req.body.username})`,
+    });
+
+    return res.status(409).json({
+      status: 'error',
+      message: 'Failed create login status for this account!',
+    });
+  }
 
   await Logs.create({
     administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
@@ -60,6 +92,8 @@ module.exports = async (req, res) => {
     data: {
       username: createAdministrationAccount.username,
       role: createAdministrationAccount.role,
+      loggedIn: createLoginStatus.loggedIn,
+      status: createLoginStatus.status,
     },
   });
 };

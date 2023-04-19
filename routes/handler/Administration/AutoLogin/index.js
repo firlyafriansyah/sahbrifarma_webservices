@@ -1,8 +1,10 @@
-const { Decryptor } = require("../../../../utils");
+const bcrypt = require('bcrypt');
+const { AdministrationAccount, Logs, LoginStatus } = require('../../../../models');
+const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { Authentication } = req.headers;
-  const { Head, Tail } = Decryptor(Authentication)
+  const { Head, Tail } = Decryptor(Authentication);
 
   const administrationAccount = await AdministrationAccount.findOne({
     where: { username: Head },
@@ -32,7 +34,7 @@ module.exports = async (req, res) => {
       message: `Password not match with this account! (target: ${Head})`,
     });
 
-    return res.status(404).json({
+    return res.status(406).json({
       status: 'error',
       message: 'Password not match with this account!',
     });
@@ -46,13 +48,31 @@ module.exports = async (req, res) => {
       message: `This account on inactive status! (target: ${Head})`,
     });
 
-    return res.status(403).json({
+    return res.status(409).json({
       status: 'error',
       message: 'This account on inactive status!',
     });
   }
 
-  if (administrationAccount.loggedIn) {
+  const loginStatus = await LoginStatus.findOne({
+    where: { uidAdministrationAccount: administrationAccount.uid },
+  });
+
+  if (!loginStatus) {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      action: 'Auto Login',
+      status: 'error',
+      message: `Login status for this administration account not found! (target: ${Head})`,
+    });
+
+    return res.status(404).json({
+      status: 'error',
+      message: 'Login status for this administration account not found!',
+    });
+  }
+
+  if (loginStatus.loggedIn) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Auto Login',
@@ -60,31 +80,27 @@ module.exports = async (req, res) => {
       message: `This account already logged in on another device! (target: ${Head})`,
     });
 
-    return res.status(404).json({
+    return res.status(409).json({
       status: 'error',
       message: 'This account already logged in on another device!',
     });
   }
 
-  const updateLastUpdate = await administrationAccount.update({
-    lastUpdate: administrationAccount.updatedAt,
-  })
-
-  if (!updateLastUpdate) {
+  if (administrationAccount.updatedAt.toString() !== loginStatus.lastUpdate.toString()) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
-      message: `Failed update last update on this account! (target: ${Head})`,
+      message: `This account recently updated, please re-login! (target: ${Head})`,
     });
 
     return res.status(409).json({
       status: 'error',
-      message: 'Failed update last update on this account!!',
+      message: 'This account recently updated, please re-login!',
     });
   }
 
-  await administrationAccount.update({
+  await loginStatus.update({
     loggedIn: true,
   });
 
@@ -102,4 +118,4 @@ module.exports = async (req, res) => {
       role: administrationAccount.role,
     },
   });
-}
+};

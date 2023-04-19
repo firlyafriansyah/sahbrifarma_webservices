@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const Validator = require('fastest-validator');
-const { AdministrationAccount, Logs } = require('../../../../models');
+const { AdministrationAccount, Logs, LoginStatus } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
 const v = new Validator();
@@ -47,7 +47,7 @@ module.exports = async (req, res) => {
       message: `Password not match with this account! (target: ${req.body.username})`,
     });
 
-    return res.status(404).json({
+    return res.status(406).json({
       status: 'error',
       message: 'Password not match with this account!',
     });
@@ -56,9 +56,9 @@ module.exports = async (req, res) => {
   if (administrationAccount.status === 'inactive') {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Auto Login',
+      action: 'Login',
       status: 'error',
-      message: `This account on inactive status! (target: ${Head})`,
+      message: `This account on inactive status! (target: ${Decryptor(req.headers.authorization).Head})`,
     });
 
     return res.status(403).json({
@@ -67,7 +67,25 @@ module.exports = async (req, res) => {
     });
   }
 
-  if (administrationAccount.loggedIn) {
+  const loginStatus = await LoginStatus.findOne({
+    where: { uidAdministrationAccount: administrationAccount.uid },
+  });
+
+  if (!loginStatus) {
+    await Logs.create({
+      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      action: 'Login',
+      status: 'error',
+      message: `Login status for this administration account not found! (target: ${req.body.username})`,
+    });
+
+    return res.status(404).json({
+      status: 'error',
+      message: 'Login status for this administration account not found!',
+    });
+  }
+
+  if (loginStatus.loggedIn) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Login',
@@ -75,22 +93,22 @@ module.exports = async (req, res) => {
       message: `This account already logged in on another device! (target: ${req.body.username})`,
     });
 
-    return res.status(404).json({
+    return res.status(409).json({
       status: 'error',
       message: 'This account already logged in on another device!',
     });
   }
 
-  const updateLastUpdate = await administrationAccount.update({
+  const updateLastUpdate = await loginStatus.update({
     lastUpdate: administrationAccount.updatedAt,
-  })
+  });
 
   if (!updateLastUpdate) {
     await Logs.create({
       administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
       action: 'Login',
       status: 'error',
-      message: `Failed update last update on this account! (target: ${Head})`,
+      message: `Failed update last update on this account! (target: ${Decryptor(req.headers.authorization).Head})`,
     });
 
     return res.status(409).json({
@@ -99,7 +117,7 @@ module.exports = async (req, res) => {
     });
   }
 
-  await administrationAccount.update({
+  await loginStatus.update({
     loggedIn: true,
   });
 
