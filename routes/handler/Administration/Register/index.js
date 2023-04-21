@@ -6,6 +6,9 @@ const { AdministrationAccount, Logs, LoginStatus } = require('../../../../models
 const v = new Validator();
 
 module.exports = async (req, res) => {
+  const { authorization } = req.headers;
+  const { User } = Decryptor(authorization);
+
   const schema = {
     username: 'string|empty:false',
     password: 'string|min:6',
@@ -26,7 +29,7 @@ module.exports = async (req, res) => {
 
   if (administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Register',
       status: 'error',
       message: `This username already used! (target: ${req.body.username})`,
@@ -48,7 +51,7 @@ module.exports = async (req, res) => {
 
   if (!createAdministrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Register',
       status: 'error',
       message: `Failed register for this account! (target: ${req.body.username})`,
@@ -61,14 +64,14 @@ module.exports = async (req, res) => {
   }
 
   const createLoginStatus = await LoginStatus.create({
-    uidAdministrationAccount: administrationAccount.uid,
+    uidAdministrationAccount: createAdministrationAccount.uid,
     loggedIn: false,
     status: 'active',
   });
 
   if (!createLoginStatus) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Register',
       status: 'error',
       message: `Failed create login status for this account! (target: ${req.body.username})`,
@@ -81,7 +84,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+    administrationAccount: User || 'Guest',
     action: 'Register',
     status: 'success',
     message: `Administration account successfully registered! (target: ${req.body.username})`,

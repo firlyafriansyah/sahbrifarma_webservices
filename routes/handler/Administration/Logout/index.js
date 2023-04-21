@@ -3,6 +3,8 @@ const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
+  const { authorization } = req.headers;
+  const { User } = Decryptor(authorization);
 
   const administrationAccount = await AdministrationAccount.findOne({
     where: { uid },
@@ -10,7 +12,7 @@ module.exports = async (req, res) => {
 
   if (!administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Logout',
       status: 'error',
       message: `Administration account with this uid not found! (target: ${uid})`,
@@ -28,7 +30,7 @@ module.exports = async (req, res) => {
 
   if (!loginStatus) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Logout',
       status: 'error',
       message: `Login status for this administration account with this uid not found! (target: ${uid})`,
@@ -42,7 +44,7 @@ module.exports = async (req, res) => {
 
   if (!loginStatus.loggedIn) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Logout',
       status: 'error',
       message: `This administration account is'nt logged in on any device! (target: ${uid})`,
@@ -60,7 +62,7 @@ module.exports = async (req, res) => {
 
   if (!updateLoginStatus) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Logout',
       status: 'error',
       message: `Update administration account login status failed! (target: ${uid})`,
@@ -73,7 +75,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+    administrationAccount: User || 'Guest',
     action: 'Logout',
     status: 'success',
     message: `Logout from this administration account success! (target: ${uid})`,

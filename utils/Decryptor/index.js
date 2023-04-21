@@ -1,18 +1,24 @@
 const CryptoJS = require('crypto-js');
 require('dotenv').config();
 
-const Decryptor = (text) => {
+const Decryptor = (text, type = 'authorization') => {
   if (text) {
     const passphrase = process.env.PASSPHRASE;
     const bytes = CryptoJS.AES.decrypt(text, passphrase);
-    const textResult = bytes.toString(CryptoJS.enc.Utf8);
+    const User = bytes.toString(CryptoJS.enc.Utf8);
 
-    const Head = textResult.split('?')[0];
-    const Tail = textResult.split('?')[1];
+    if (type === 'authentication') {
+      const Head = User.split('?')[0];
+      const Tail = User.split('?')[1];
+
+      return {
+        Head,
+        Tail,
+      };
+    }
 
     return {
-      Head,
-      Tail,
+      User,
     };
   }
   return 'Guest';

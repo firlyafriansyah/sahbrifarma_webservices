@@ -6,6 +6,10 @@ const { AdministrationAccount, Logs } = require('../../../../models');
 const v = new Validator();
 
 module.exports = async (req, res) => {
+  const { uid } = req.params;
+  const { authorization } = req.headers;
+  const { User } = Decryptor(authorization);
+
   const schema = {
     username: 'string|empty:false',
     password: 'string|min:6',
@@ -14,13 +18,11 @@ module.exports = async (req, res) => {
 
   const validate = v.validate(req.body, schema);
   if (validate.length) {
-    return res.status(400).json({
+    return res.status(409).json({
       status: 'error',
       message: validate,
     });
   }
-
-  const { uid } = req.params;
 
   const administrationAccount = await AdministrationAccount.findOne({
     where: { uid },
@@ -28,7 +30,7 @@ module.exports = async (req, res) => {
 
   if (!administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Update Administration Account Data',
       status: 'error',
       message: `Administration account not found! (target: ${uid})`,
@@ -40,19 +42,33 @@ module.exports = async (req, res) => {
     });
   }
 
+  if (administrationAccount.role === 'super-admin') {
+    await Logs.create({
+      administrationAccount: User || 'Guest',
+      action: 'Update Administration Account Data',
+      status: 'error',
+      message: `This administration account have super admin role, you can't update or change anything on super admin account role! (target: ${uid})`,
+    });
+
+    return res.status(404).json({
+      status: 'error',
+      message: 'This administration account have super admin role, you can\'t update or change anything on super admin account role!',
+    });
+  }
+
   const checkName = await AdministrationAccount.findOne({
     where: { username: req.body.username },
   });
 
   if (checkName && checkName.username !== administrationAccount.username) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Update Administration Account Data',
       status: 'error',
       message: `This username already used! (target: ${uid}`,
     });
 
-    return res.status(400).json({
+    return res.status(409).json({
       status: 'error',
       message: 'This username already used!',
     });
@@ -76,20 +92,20 @@ module.exports = async (req, res) => {
 
   if (!updateAdministrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Update Administration Account Data',
       status: 'error',
       message: `Administration account failed updated! (target: ${uid})`,
     });
 
-    return res.status(400).json({
+    return res.status(409).json({
       status: 'error',
       message: 'Administration account failed updated!',
     });
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+    administrationAccount: User || 'Guest',
     action: 'Update Administration Account',
     status: 'success',
     message: `Update administration account successfully updated! (target: ${uid})`,

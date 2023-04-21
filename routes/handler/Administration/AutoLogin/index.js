@@ -1,10 +1,23 @@
-const bcrypt = require('bcrypt');
 const { AdministrationAccount, Logs, LoginStatus } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
-  const { Authentication } = req.headers;
-  const { Head, Tail } = Decryptor(Authentication);
+  const { authentication } = req.headers;
+  const { Head, Tail } = Decryptor(authentication, 'authentication');
+
+  if (!authentication) {
+    await Logs.create({
+      administrationAccount: Head || 'Guest',
+      action: 'Super Admin Middleware',
+      status: 'error',
+      message: `Authentication not found! (target: ${Head})`,
+    });
+
+    return res.status(401).json({
+      status: 'error',
+      message: 'Authentication not found!',
+    });
+  }
 
   const administrationAccount = await AdministrationAccount.findOne({
     where: { username: Head },
@@ -12,7 +25,7 @@ module.exports = async (req, res) => {
 
   if (!administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
       message: `Administration account not found! (target: ${Head})`,
@@ -24,11 +37,9 @@ module.exports = async (req, res) => {
     });
   }
 
-  const isValidPassword = await bcrypt.compare(Tail, administrationAccount.password);
-
-  if (!isValidPassword) {
+  if (Tail !== administrationAccount.password) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
       message: `Password not match with this account! (target: ${Head})`,
@@ -42,7 +53,7 @@ module.exports = async (req, res) => {
 
   if (administrationAccount.status === 'inactive') {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
       message: `This account on inactive status! (target: ${Head})`,
@@ -60,7 +71,7 @@ module.exports = async (req, res) => {
 
   if (!loginStatus) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
       message: `Login status for this administration account not found! (target: ${Head})`,
@@ -72,23 +83,23 @@ module.exports = async (req, res) => {
     });
   }
 
-  if (loginStatus.loggedIn) {
+  if (!loginStatus.loggedIn) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
-      message: `This account already logged in on another device! (target: ${Head})`,
+      message: `This account is not logged in on any device! (target: ${Head})`,
     });
 
     return res.status(409).json({
       status: 'error',
-      message: 'This account already logged in on another device!',
+      message: 'This account is not logged in on any device!',
     });
   }
 
   if (administrationAccount.updatedAt.toString() !== loginStatus.lastUpdate.toString()) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: Head || 'Guest',
       action: 'Auto Login',
       status: 'error',
       message: `This account recently updated, please re-login! (target: ${Head})`,
@@ -105,7 +116,7 @@ module.exports = async (req, res) => {
   });
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+    administrationAccount: Head || 'Guest',
     action: 'Auto Login',
     status: 'success',
     message: `Login success! (target: ${Head})`,

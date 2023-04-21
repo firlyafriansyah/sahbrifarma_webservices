@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       field: 'logged_in',
       type: DataTypes.BOOLEAN,
       allowNull: false,
+      defaultValue: false,
     },
     lastUpdate: {
       field: 'last_update',

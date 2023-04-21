@@ -14,5 +14,6 @@ router.get('/detail/:uid', middleware.SuperAuthorization, administrationHandler.
 router.put('/update/:uid', middleware.SuperAuthorization, administrationHandler.UpdateAdministrationAccount);
 router.delete('/delete/:uid', middleware.SuperAuthorization, administrationHandler.DeleteAdministrationAccount);
 router.put('/disabled/:uid', middleware.SuperAuthorization, administrationHandler.DisabledAdministrationAccount);
+router.put('/actived/:uid', middleware.SuperAuthorization, administrationHandler.ActivedAdministrationAccount);
 
 module.exports = router;

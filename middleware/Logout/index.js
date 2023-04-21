@@ -4,15 +4,15 @@ const { AdministrationAccount, Logs, LoginStatus } = require('../../models');
 module.exports = async (req, res, next) => {
   const { authorization } = req.headers;
   const { uid } = req.params;
-  const { Head, Tail } = Decryptor(authorization);
+  const { User } = Decryptor(authorization);
 
   // CHECK REQUEST HEADERS
   if (!authorization) {
     await Logs.create({
-      administrationAccount: Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Logout Middleware',
       status: 'error',
-      message: `Authorization not found! (target: ${Head})`,
+      message: `Authorization not found! (target: ${User})`,
     });
 
     return res.status(401).json({
@@ -22,7 +22,7 @@ module.exports = async (req, res, next) => {
   }
 
   const administrationAccount = await AdministrationAccount.findOne({
-    where: { username: Head },
+    where: { username: User },
   });
 
   const administrationAccountFromUid = await AdministrationAccount.findOne({
@@ -30,12 +30,12 @@ module.exports = async (req, res, next) => {
   });
 
   // CHECK ADMINISTRATION ACCOUNT IS EXIST
-  if (!administrationAccount && !administrationAccountFromUid) {
+  if (!administrationAccount || !administrationAccountFromUid) {
     await Logs.create({
-      administrationAccount: Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Logout Middleware',
       status: 'error',
-      message: `This account not found! (target: ${Head})`,
+      message: `This account not found! (target: ${User})`,
     });
 
     return res.status(404).json({
@@ -45,12 +45,12 @@ module.exports = async (req, res, next) => {
   }
 
   // CHECK ADMINISTRATION ACCOUNT HAVE THIS PERMISSION
-  if (Tail !== administrationAccountFromUid.role && Tail !== 'super-admin') {
+  if (administrationAccount.role !== administrationAccountFromUid.role && administrationAccount.role !== 'super-admin') {
     await Logs.create({
-      administrationAccount: Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Logout Middleware',
       status: 'error',
-      message: `This account not have authorization for this API endpoint! (target: ${Head})`,
+      message: `This account not have authorization for this API endpoint! (target: ${User})`,
     });
 
     return res.status(401).json({
@@ -66,10 +66,10 @@ module.exports = async (req, res, next) => {
   // CHECK LOGIN STATUS IS EXIST
   if (!loginStatus) {
     await Logs.create({
-      administrationAccount: Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Logout Middleware',
       status: 'error',
-      message: `Login status this account not found! (target: ${Head})`,
+      message: `Login status this account not found! (target: ${User})`,
     });
 
     return res.status(404).json({
@@ -81,10 +81,10 @@ module.exports = async (req, res, next) => {
   // CHECK LOGIN STATUS IS ACTIVE
   if (administrationAccount.status === 'inactive') {
     await Logs.create({
-      administrationAccount: Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Logout Middleware',
       status: 'error',
-      message: `This account status is inactive! (target: ${Head})`,
+      message: `This account status is inactive! (target: ${User})`,
     });
 
     return res.status(409).json({
@@ -96,30 +96,15 @@ module.exports = async (req, res, next) => {
   // CHECK LOGIN STATUS IS LOGGED IN
   if (!loginStatus.loggedIn) {
     await Logs.create({
-      administrationAccount: Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Doctor Middleware',
       status: 'error',
-      message: `This account not logged in on any device! (target: ${Head})`,
+      message: `This account not logged in on any device! (target: ${User})`,
     });
 
     return res.status(409).json({
       status: 'error',
       message: 'This account not logged in on any device!',
-    });
-  }
-
-  // CHECK ADMINISTRATION ACCOUNT NOT UPDATED LATELY
-  if (loginStatus.lastUpdate.toString() !== administrationAccount.updatedAt.toString()) {
-    await Logs.create({
-      administrationAccount: Head || 'Guest',
-      action: 'Logout Middleware',
-      status: 'error',
-      message: `This account recently updated, please re-login! (target: ${Head})`,
-    });
-
-    return res.status(409).json({
-      status: 'error',
-      message: 'This account recently updated, please re-login!',
     });
   }
 

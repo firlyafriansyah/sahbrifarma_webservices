@@ -24,6 +24,7 @@ module.exports = {
         type: Sequelize.ENUM,
         values: ['active', 'inactive'],
         allowNull: false,
+        defaultValue: 'active',
       },
       created_at: {
         type: Sequelize.DATE,

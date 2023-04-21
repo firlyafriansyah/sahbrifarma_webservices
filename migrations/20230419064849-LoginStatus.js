@@ -14,6 +14,7 @@ module.exports = {
       logged_in: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
+        defaultValue: false,
       },
       last_update: {
         type: Sequelize.DATE,
