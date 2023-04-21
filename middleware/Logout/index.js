@@ -3,13 +3,14 @@ const { AdministrationAccount, Logs, LoginStatus } = require('../../models');
 
 module.exports = async (req, res, next) => {
   const { authorization } = req.headers;
+  const { uid } = req.params;
   const { Head, Tail } = Decryptor(authorization);
 
   // CHECK REQUEST HEADERS
   if (!authorization) {
     await Logs.create({
       administrationAccount: Head || 'Guest',
-      action: 'Super Admin Middleware',
+      action: 'Logout Middleware',
       status: 'error',
       message: `Authorization not found! (target: ${Head})`,
     });
@@ -24,11 +25,15 @@ module.exports = async (req, res, next) => {
     where: { username: Head },
   });
 
+  const administrationAccountFromUid = await AdministrationAccount.findOne({
+    where: { uid },
+  });
+
   // CHECK ADMINISTRATION ACCOUNT IS EXIST
-  if (!administrationAccount) {
+  if (!administrationAccount && !administrationAccountFromUid) {
     await Logs.create({
       administrationAccount: Head || 'Guest',
-      action: 'Super Admin Middleware',
+      action: 'Logout Middleware',
       status: 'error',
       message: `This account not found! (target: ${Head})`,
     });
@@ -40,10 +45,10 @@ module.exports = async (req, res, next) => {
   }
 
   // CHECK ADMINISTRATION ACCOUNT HAVE THIS PERMISSION
-  if (Tail !== 'super-admin') {
+  if (Tail !== administrationAccountFromUid.role && Tail !== 'super-admin') {
     await Logs.create({
       administrationAccount: Head || 'Guest',
-      action: 'Super Admin Middleware',
+      action: 'Logout Middleware',
       status: 'error',
       message: `This account not have authorization for this API endpoint! (target: ${Head})`,
     });
@@ -62,7 +67,7 @@ module.exports = async (req, res, next) => {
   if (!loginStatus) {
     await Logs.create({
       administrationAccount: Head || 'Guest',
-      action: 'Super Admin Middleware',
+      action: 'Logout Middleware',
       status: 'error',
       message: `Login status this account not found! (target: ${Head})`,
     });
@@ -77,7 +82,7 @@ module.exports = async (req, res, next) => {
   if (administrationAccount.status === 'inactive') {
     await Logs.create({
       administrationAccount: Head || 'Guest',
-      action: 'Super Admin Middleware',
+      action: 'Logout Middleware',
       status: 'error',
       message: `This account status is inactive! (target: ${Head})`,
     });
@@ -92,7 +97,7 @@ module.exports = async (req, res, next) => {
   if (!loginStatus.loggedIn) {
     await Logs.create({
       administrationAccount: Head || 'Guest',
-      action: 'Super Admin Middleware',
+      action: 'Doctor Middleware',
       status: 'error',
       message: `This account not logged in on any device! (target: ${Head})`,
     });
@@ -107,7 +112,7 @@ module.exports = async (req, res, next) => {
   if (loginStatus.lastUpdate.toString() !== administrationAccount.updatedAt.toString()) {
     await Logs.create({
       administrationAccount: Head || 'Guest',
-      action: 'Super Admin Middleware',
+      action: 'Logout Middleware',
       status: 'error',
       message: `This account recently updated, please re-login! (target: ${Head})`,
     });

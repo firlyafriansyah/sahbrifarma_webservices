@@ -3,6 +3,9 @@ const { AdministrationAccount, Logs } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
+  const { authorization } = req.headers;
+  const { Head } = Decryptor(authorization);
+
   const administrationAccount = await AdministrationAccount.findAll({
     where: { role: { [Op.not]: 'super-admin' } },
     attributes: ['username', 'role', ['updated_at', 'updatedAt']],
@@ -10,7 +13,7 @@ module.exports = async (req, res) => {
 
   if (!administrationAccount) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: Head || 'Guest',
       action: 'Get All Administration Account',
       status: 'error',
       message: 'Administration account list not found!',
@@ -23,7 +26,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+    administrationAccount: Head || 'Guest',
     action: 'Get All Administration Account',
     status: 'success',
     message: 'Get administration account list success!',
