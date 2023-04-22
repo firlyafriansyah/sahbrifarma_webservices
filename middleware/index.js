@@ -4,7 +4,7 @@ const NurseAuthorization = require('./NurseAuthorization');
 const PharmacistAuthorization = require('./PharmacistAuthorization');
 const SuperAuthorization = require('./SuperAuthorization');
 const Logout = require('./Logout');
-const Queue = require('./Logout');
+const Queue = require('./Queue');
 
 module.exports = {
   DoctorAuthorization,

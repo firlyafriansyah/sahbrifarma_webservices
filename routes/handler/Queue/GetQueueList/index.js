@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
 
   const getQueueList = await Queue.findAll({
     where: { status },
-    attributes: ['uidPatient', 'patientName', 'status', ['updatedAt', 'lastUpdate']],
+    attributes: ['uidPatient', 'patientName', 'status', ['updated_at', 'lastUpdate']],
   });
 
   if (!getQueueList) {

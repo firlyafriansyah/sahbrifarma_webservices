@@ -5,6 +5,7 @@ module.exports = async (req, res, next) => {
   const { authorization } = req.headers;
   const { status } = req.params;
   const { User } = Decryptor(authorization);
+  let role;
 
   // CHECK REQUEST HEADERS
   if (!authorization) {
@@ -40,8 +41,16 @@ module.exports = async (req, res, next) => {
     });
   }
 
+  if (status === 'in_medical_test_queue') {
+    role = 'nurse';
+  } else if (status === 'in_doctoral_consultation_queue') {
+    role = 'doctor';
+  } else if (status === 'in_pharmacist_queue') {
+    role = 'pharmacist';
+  }
+
   // CHECK ADMINISTRATION ACCOUNT HAVE THIS PERMISSION
-  if (!status.include(administrationAccount.role) && administrationAccount.role !== 'super-admin') {
+  if (role !== administrationAccount.role && administrationAccount.role !== 'super-admin') {
     await Logs.create({
       administrationAccount: User || 'Guest',
       action: 'Logout Middleware',
