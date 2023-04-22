@@ -19,6 +19,7 @@ module.exports = {
         type: Sequelize.ENUM,
         values: ['in_medical_test_queue', 'in_doctoral_consultation_queue', 'in_pharmacist_queue', 'out_of_queue'],
         allowNull: false,
+        defaultValue: 'out_of_queue',
       },
       created_at: {
         type: Sequelize.DATE,

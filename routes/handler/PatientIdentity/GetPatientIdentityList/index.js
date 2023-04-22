@@ -2,16 +2,16 @@ const { PatientIdentity, Logs } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
-  const { uid } = req.params;
+  const { authorization } = req.headers;
+  const { User } = Decryptor(authorization);
 
-  const patientIdentityList = await PatientIdentity.findOne({
-    where: { uid },
+  const patientIdentityList = await PatientIdentity.findAll({
     attributes: ['uid', 'name', 'dateOfBirth', 'sex'],
   });
 
   if (!patientIdentityList) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Get Patient Identity List',
       status: 'error',
       message: 'Get patient identity list failed!',
@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+    administrationAccount: User || 'Guest',
     action: 'Get Patient Identity List',
     status: 'success',
     message: 'Get patient identity list success!',

@@ -3,15 +3,17 @@ const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
+  const { authorization } = req.headers;
+  const { User } = Decryptor(authorization);
 
   const patientIdentity = await PatientIdentity.findOne({
     where: { uid },
-    attributes: ['uid', 'name', 'address', 'phoneNumber', 'emergencyPhoneNumber', 'dateOfBirth', 'sex', ['updatedAt', 'lastUpdated']],
+    attributes: ['uid', 'name', 'address', 'phoneNumber', 'emergencyPhoneNumber', 'dateOfBirth', 'sex', ['updated_at', 'lastUpdated']],
   });
 
   if (!patientIdentity) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Get Patient Identity',
       status: 'error',
       message: `Patient with this uid not found! (target: ${uid})`,
@@ -24,7 +26,7 @@ module.exports = async (req, res) => {
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+    administrationAccount: User || 'Guest',
     action: 'Get Patient Identity',
     status: 'success',
     message: `Get patient with this uid success! (target: ${uid})`,
