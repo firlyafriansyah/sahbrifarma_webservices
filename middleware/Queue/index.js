@@ -1,17 +1,18 @@
 const { Decryptor } = require('../../utils');
-const { AdministrationAccount, Logs, LoginStatus } = require('../../models');
+const {
+  AdministrationAccount, Logs, LoginStatus,
+} = require('../../models');
 
 module.exports = async (req, res, next) => {
   const { authorization } = req.headers;
-  const { status } = req.params;
+  const { uid, currentStatus, newStatus } = req.params;
   const { User } = Decryptor(authorization);
-  let role;
 
   // CHECK REQUEST HEADERS
   if (!authorization) {
     await Logs.create({
       administrationAccount: User || 'Guest',
-      action: 'Logout Middleware',
+      action: 'Queue Middleware',
       status: 'error',
       message: `Authorization not found! (target: ${User})`,
     });
@@ -30,38 +31,90 @@ module.exports = async (req, res, next) => {
   if (!administrationAccount) {
     await Logs.create({
       administrationAccount: User || 'Guest',
-      action: 'Logout Middleware',
+      action: 'Queue Middleware',
       status: 'error',
-      message: `This account not found! (target: ${User})`,
+      message: `This administration account not found! (target: ${User})`,
     });
 
     return res.status(404).json({
       status: 'error',
-      message: 'This account not found!',
+      message: 'This administration account not found!',
     });
-  }
-
-  if (status === 'in_medical_test_queue') {
-    role = 'nurse';
-  } else if (status === 'in_doctoral_consultation_queue') {
-    role = 'doctor';
-  } else if (status === 'in_pharmacist_queue') {
-    role = 'pharmacist';
   }
 
   // CHECK ADMINISTRATION ACCOUNT HAVE THIS PERMISSION
-  if (role !== administrationAccount.role && administrationAccount.role !== 'super-admin') {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Logout Middleware',
-      status: 'error',
-      message: `This account not have authorization for this API endpoint! (target: ${User})`,
-    });
+  if (uid) {
+    if (administrationAccount.role === 'frontdesk') {
+      if (currentStatus === 'out_of_queue') {
+        if (newStatus !== 'in_medical_test_queue' && newStatus !== 'in_pharmacist_queue') {
+          await Logs.create({
+            administrationAccount: User || 'Guest',
+            action: 'Queue Middleware',
+            status: 'error',
+            message: `This administration account not authorize for this action! (target: ${User})`,
+          });
 
-    return res.status(401).json({
-      status: 'error',
-      message: 'This account not have authorization for this API endpoint!',
-    });
+          return res.status(401).json({
+            status: 'error',
+            message: 'This administration account not authorize for this action!',
+          });
+        }
+      } else {
+        await Logs.create({
+          administrationAccount: User || 'Guest',
+          action: 'Queue Middleware',
+          status: 'error',
+          message: `This administration account not authorize for this action! (target: ${User})`,
+        });
+
+        return res.status(401).json({
+          status: 'error',
+          message: 'This administration account not authorize for this action!',
+        });
+      }
+    } else if (administrationAccount.role === 'nurse') {
+      if (currentStatus !== 'in_medical_test_queue' && newStatus !== 'in_doctoral_consultation_queue') {
+        await Logs.create({
+          administrationAccount: User || 'Guest',
+          action: 'Queue Middleware',
+          status: 'error',
+          message: `This administration account not authorize for this action! (target: ${User})`,
+        });
+
+        return res.status(401).json({
+          status: 'error',
+          message: 'This administration account not authorize for this action!',
+        });
+      }
+    } else if (administrationAccount.role === 'doctor') {
+      if (currentStatus !== 'in_doctoral_consultation_queue' && newStatus !== 'in_pharmacist_queue') {
+        await Logs.create({
+          administrationAccount: User || 'Guest',
+          action: 'Queue Middleware',
+          status: 'error',
+          message: `This administration account not authorize for this action! (target: ${User})`,
+        });
+
+        return res.status(401).json({
+          status: 'error',
+          message: 'This administration account not authorize for this action!',
+        });
+      }
+    } else if (administrationAccount.role === 'pharmacist') {
+      if (currentStatus !== 'in_pharmacist_queue' && newStatus !== 'out_of_queue') {
+        await Logs.create({
+          administrationAccount: User || 'Guest',
+          action: 'Queue Middleware',
+          status: 'error',
+          message: `This administration account not authorize for this action! (target: ${User})`,
+        });
+
+        return res.status(401).json({
+          status: 'error',
+          message: 'This administration account not authorize for this action!',
+        });
+      }
+    }
   }
 
   const loginStatus = await LoginStatus.findOne({

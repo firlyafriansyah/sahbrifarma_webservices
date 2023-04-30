@@ -2,23 +2,39 @@ const { Queue, Logs } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
-  const { uidPatient, newStatus } = req.params;
+  const { uid, currentStatus, newStatus } = req.params;
+  const { authorization } = req.headers;
+  const { User } = Decryptor(authorization);
 
   const queue = await Queue.findOne({
-    where: { uidPatient },
+    where: { uidPatient: uid },
   });
 
   if (!queue) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: `Update Queue With Patient Uid: ${uidPatient}`,
+      administrationAccount: User || 'Guest',
+      action: `Update Queue With Patient Uid: ${uid}`,
       status: 'error',
-      message: `Patient with patient uid: ${uidPatient} not found!`,
+      message: `Patient with patient uid: ${uid} not found!`,
     });
 
     return res.status(404).json({
       status: 'error',
-      message: `Patient with patient uid: ${uidPatient} not found!`,
+      message: `Patient with patient uid: ${uid} not found!`,
+    });
+  }
+
+  if (queue.status !== currentStatus) {
+    await Logs.create({
+      administrationAccount: User || 'Guest',
+      action: `Update Queue With Patient Uid: ${uid}`,
+      status: 'error',
+      message: 'This current status for this account is wrong!',
+    });
+
+    return res.status(409).json({
+      status: 'error',
+      message: 'This current status for this account is wrong!',
     });
   }
 
@@ -28,23 +44,23 @@ module.exports = async (req, res) => {
 
   if (!updateQueue) {
     await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+      administrationAccount: User || 'Guest',
       action: 'Update Patient Queue Status',
       status: 'error',
-      message: `Patient queue failed updated! (target: ${uidPatient})`,
+      message: `Patient queue failed updated! (target: ${uid})`,
     });
 
-    return res.status(400).json({
+    return res.status(409).json({
       status: 'error',
       message: 'Patient queue failed updated!',
     });
   }
 
   await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
+    administrationAccount: User || 'Guest',
     action: 'Update Patient Queue Status',
     status: 'success',
-    message: `Update patient queue status successfull! (target: ${uidPatient})`,
+    message: `Update patient queue status successfull! (target: ${uid})`,
   });
 
   return res.json({
