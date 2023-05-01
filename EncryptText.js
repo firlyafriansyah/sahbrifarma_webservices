@@ -1,5 +1,9 @@
 const CryptoJS = require('crypto-js');
 
-const text = CryptoJS.AES.encrypt('username?id?role/password', '_f1rly_').toString();
+// Authorization
+const text = CryptoJS.AES.encrypt('username', '_f1rly_').toString();
+
+// Authentication
+// const text = CryptoJS.AES.encrypt('username?password', '_f1rly_').toString();
 
 console.log(text);

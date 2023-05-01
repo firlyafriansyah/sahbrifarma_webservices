@@ -76,8 +76,11 @@ module.exports = async (req, res) => {
 
   const password = await bcrypt.hash(req.body.password, 10);
 
-  if (req.body.username === checkName.username && req.body.role === checkName.role
-    && await bcrypt.compare(req.body.password, checkName.password)) {
+  if (
+    req.body.username === administrationAccount.username
+    && req.body.role === administrationAccount.role
+    && await bcrypt.compare(req.body.password, administrationAccount.password)
+  ) {
     return res.json({
       status: 'success',
       message: 'Administration account data same with existing data!',
