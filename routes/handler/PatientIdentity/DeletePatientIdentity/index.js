@@ -12,6 +12,20 @@ module.exports = async (req, res) => {
     where: { uid },
   });
 
+  if (!patientIdentity) {
+    await Logs.create({
+      administrationAccount: User || 'Guest',
+      action: 'Deleted Patient Identity',
+      status: 'error',
+      message: `Patient with this id not found! (target: ${uid})`,
+    });
+
+    return res.status(404).json({
+      status: 'error',
+      message: 'Patient with this id not found!',
+    });
+  }
+
   const allergies = await Allergies.findOne({
     where: { uidPatient: uid },
   });
@@ -36,56 +50,41 @@ module.exports = async (req, res) => {
     where: { uidPatient: uid },
   });
 
-  Promise.all([
-    patientIdentity, allergies, anamnesis, diagnosis, medicalTest, medicine, queue,
-  ]).catch(async () => {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Deleted Patient Identity',
-      status: 'error',
-      message: `Patient with this uid not found! (target: ${uid})`,
-    });
+  if (allergies) {
+    await allergies.destroy();
+  }
 
-    return res.status(403).json({
-      status: 'error',
-      message: 'Patient with this uid not found!',
-    });
+  if (anamnesis) {
+    await anamnesis.destroy();
+  }
+
+  if (diagnosis) {
+    await diagnosis.destroy();
+  }
+
+  if (medicalTest) {
+    await medicalTest.destroy();
+  }
+
+  if (medicine) {
+    await medicine.destroy();
+  }
+
+  if (queue) {
+    await queue.destroy();
+  }
+
+  await patientIdentity.destroy();
+
+  await Logs.create({
+    administrationAccount: User || 'Guest',
+    action: 'Deleted Patient Identity',
+    status: 'success',
+    message: `Patient identity successfully deleted! (target: ${uid})`,
   });
 
-  const patientIdentityDestroy = await patientIdentity.destroy();
-  const allergiesDestroy = await allergies.destroy();
-  const anamnesisDestroy = await anamnesis.destroy();
-  const diagnosisDestroy = await diagnosis.destroy();
-  const medicalTestDestroy = await medicalTest.destroy();
-  const medicineDestroy = await medicine.destroy();
-  const queueDestroy = await queue.destroy();
-
-  return Promise.all([
-    patientIdentityDestroy, allergiesDestroy, anamnesisDestroy,
-    diagnosisDestroy, medicalTestDestroy, medicineDestroy, queueDestroy,
-  ]).then(async () => {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Deleted Patient Identity',
-      status: 'success',
-      message: `Patient identity successfully deleted! (target: ${uid})`,
-    });
-
-    return res.json({
-      status: 'success',
-      message: 'Patient identity successfully deleted!',
-    });
-  }).catch(async () => {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Deleted Patient Identity',
-      status: 'error',
-      message: `Patient identity deleted failed! (target: ${uid})`,
-    });
-
-    return res.status(409).json({
-      status: 'error',
-      message: 'Patient identity deleted failed!',
-    });
+  return res.json({
+    status: 'success',
+    message: 'Patient identity successfully deleted!',
   });
 };

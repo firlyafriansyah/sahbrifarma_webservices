@@ -1,6 +1,6 @@
 const Validator = require('fastest-validator');
 const {
-  PatientIdentity, Allergies, Anamnesis, Diagnosis, MedicalTest, Medicine, Logs, Queue,
+  PatientIdentity, Logs, Queue,
 } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
@@ -40,41 +40,16 @@ module.exports = async (req, res) => {
     sex: req.body.jenis_kelamin,
   };
 
-  const allergiesData = {
-    uidPatient: IDPasien,
-  };
-
-  const anamnesisData = {
-    uidPatient: IDPasien,
-  };
-
-  const diagnosisData = {
-    uidPatient: IDPasien,
-  };
-
-  const medicalTestData = {
-    uidPatient: IDPasien,
-  };
-
-  const medicineData = {
-    uidPatient: IDPasien,
-  };
-
   const queueData = {
     uidPatient: IDPasien,
     patientName: req.body.nama_lengkap,
   };
 
   const patientIdentity = await PatientIdentity.create(patientIdentityData);
-  const allergies = await Allergies.create(allergiesData);
-  const anamnesis = await Anamnesis.create(anamnesisData);
-  const diagnosis = await Diagnosis.create(diagnosisData);
-  const medicalTest = await MedicalTest.create(medicalTestData);
-  const medicine = await Medicine.create(medicineData);
   const queue = await Queue.create(queueData);
 
   return Promise.all([
-    patientIdentity, allergies, anamnesis, diagnosis, medicalTest, medicine, queue,
+    patientIdentity, queue,
   ]).then(async () => {
     await Logs.create({
       administrationAccount: User || 'Guest',
