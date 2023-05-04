@@ -1,4 +1,4 @@
-const { MedicalTest, PatientIdentity, Logs } = require('../../../../models');
+const { MedicalTest, Logs } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
 module.exports = async (req, res) => {
@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
   if (!medicalTest) {
     await Logs.create({
       administrationAccount: User || 'Guest',
-      action: 'Get Medical Test Detail',
+      action: 'Delete Medical Test',
       status: 'error',
       message: `Medical test with this uid not found! (target: ${uid})`,
     });
@@ -24,37 +24,31 @@ module.exports = async (req, res) => {
     });
   }
 
-  const patientIdentity = await PatientIdentity.findOne({
-    where: { uid: medicalTest.uidPatient },
-    attributes: ['name', 'date_of_birth', 'sex'],
-  });
+  const deleteMedicalTest = await medicalTest.destroy();
 
-  if (!patientIdentity) {
+  if (!deleteMedicalTest) {
     await Logs.create({
       administrationAccount: User || 'Guest',
-      action: 'Get Medical Test Detail',
+      action: 'Delete Medical Test',
       status: 'error',
-      message: `Patient identity with this medical test uid patient not found! (target: ${medicalTest.uidPatient})`,
+      message: `Delete this medical test failed! (target: ${uid})`,
     });
 
-    return res.status(404).json({
+    return res.status(409).json({
       status: 'error',
-      message: 'Patient identity with this medical test uid patient not found!',
+      message: 'Delete this medical test failed',
     });
   }
 
   await Logs.create({
     administrationAccount: User || 'Guest',
-    action: 'Get Medical Test Detail',
-    status: 'success',
-    message: `Get medical test detail success! (target: ${uid})`,
+    action: 'Delete Medical Test',
+    status: 'error',
+    message: `Delete this medical test success! (target: ${uid})`,
   });
 
   return res.json({
     status: 'success',
-    data: {
-      patientIdentity,
-      medicalTest,
-    },
+    message: 'Delete this medical test success!',
   });
 };
