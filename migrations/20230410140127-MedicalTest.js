@@ -12,22 +12,25 @@ module.exports = {
         allowNull: false,
       },
       body_height: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.FLOAT,
       },
       body_weight: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.FLOAT,
+      },
+      body_temperature: {
+        type: Sequelize.FLOAT,
       },
       blood_preasure: {
         type: Sequelize.STRING,
       },
       blood_sugar: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.FLOAT,
       },
       uric_acid: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.FLOAT,
       },
       cholesterol: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.FLOAT,
       },
       created_at: {
         type: Sequelize.DATE,

@@ -13,11 +13,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     bodyHeight: {
       field: 'body_height',
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
     },
     bodyWeight: {
       field: 'body_weight',
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
+    },
+    bodyTemperature: {
+      field: 'body_parameter',
+      type: DataTypes.FLOAT,
     },
     bloodPreasure: {
       field: 'blood_preasure',
@@ -25,14 +29,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     bloodSugar: {
       field: 'blood_sugar',
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
     },
     uricAcid: {
       field: 'uric_acid',
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
     },
     cholesterol: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
     },
     createdAt: {
       field: 'created_at',
