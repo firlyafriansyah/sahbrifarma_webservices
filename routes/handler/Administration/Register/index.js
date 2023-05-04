@@ -47,6 +47,7 @@ module.exports = async (req, res) => {
     username: req.body.username,
     password,
     role: req.body.role,
+    status: 'active',
   });
 
   if (!createAdministrationAccount) {
@@ -66,7 +67,6 @@ module.exports = async (req, res) => {
   const createLoginStatus = await LoginStatus.create({
     uidAdministrationAccount: createAdministrationAccount.uid,
     loggedIn: false,
-    status: 'active',
   });
 
   if (!createLoginStatus) {
