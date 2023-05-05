@@ -4,7 +4,7 @@ const { Decryptor } = require('../../../../utils');
 
 const v = new Validator();
 
-module.export = async (req, res) => {
+module.exports = async (req, res) => {
   const { uid } = req.params;
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);

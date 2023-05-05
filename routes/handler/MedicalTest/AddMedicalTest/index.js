@@ -1,7 +1,7 @@
 const { PatientIdentity, MedicalTest, Logs } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
-module.export = async (req, res) => {
+module.exports = async (req, res) => {
   const { uidPatient } = req.params;
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);
