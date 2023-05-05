@@ -1,4 +1,4 @@
-const { default: Validator } = require('fastest-validator');
+const Validator = require('fastest-validator');
 const { MedicalTest, Logs } = require('../../../../models');
 const { Decryptor } = require('../../../../utils');
 
