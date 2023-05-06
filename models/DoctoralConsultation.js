@@ -1,15 +1,21 @@
 module.exports = (sequelize, DataTypes) => {
-  const Diagnosis = sequelize.define('Diagnosis', {
+  const DoctoralConsultation = sequelize.define('DoctoralConsultation', {
     uid: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
       autoIncrement: true,
+      primaryKey: true,
       allowNull: false,
     },
     uidPatient: {
       field: 'uid_patient',
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    allergies: {
+      type: DataTypes.STRING,
+    },
+    anamnesis: {
+      type: DataTypes.STRING,
     },
     diagnosis: {
       type: DataTypes.STRING,
@@ -28,9 +34,9 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
   }, {
-    tableName: 'diagnosis',
+    tableName: 'doctoral_consultation',
     timestamps: true,
   });
 
-  return Diagnosis;
+  return DoctoralConsultation;
 };

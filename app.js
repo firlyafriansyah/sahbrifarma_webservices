@@ -8,6 +8,7 @@ const patientIdentityRouter = require('./routes/PatientIdentity');
 const serviceConnectionTestRouter = require('./routes/ServiceConnectionTest');
 const queueRouter = require('./routes/Queue');
 const medicalTestRouter = require('./routes/MedicalTest');
+const doctoralConsultationRouter = require('./routes/DoctoralConsultation');
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use('/patient', patientIdentityRouter);
 app.use('/services-connection-test', serviceConnectionTestRouter);
 app.use('/queue', queueRouter);
 app.use('/medical-test', medicalTestRouter);
+app.use('/doctoral-consultation', doctoralConsultationRouter);
 
 // #THIS FOR HEROKU PRODUCTION CONFIGURATION
 // app.listen(process.env.PORT || 3000, () => {

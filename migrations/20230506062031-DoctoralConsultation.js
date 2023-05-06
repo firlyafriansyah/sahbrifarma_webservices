@@ -1,6 +1,6 @@
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('diagnosis', {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable('doctoral_consulation', {
       uid: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -10,6 +10,12 @@ module.exports = {
       uid_patient: {
         type: Sequelize.STRING,
         allowNull: false,
+      },
+      allergies: {
+        type: Sequelize.STRING,
+      },
+      anamnesis: {
+        type: Sequelize.STRING,
       },
       diagnosis: {
         type: Sequelize.STRING,
@@ -28,7 +34,7 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface) => {
-    await queryInterface.dropTable('diagnosis');
+  async down(queryInterface) {
+    await queryInterface.dropTable('doctoral_consulation');
   },
 };
