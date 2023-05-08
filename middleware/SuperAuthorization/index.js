@@ -1,5 +1,5 @@
-const { Decryptor } = require('../../utils');
-const { AdministrationAccount, Logs, LoginStatus } = require('../../models');
+const { Decryptor, LogsCreator } = require('../../utils');
+const { AdministrationAccount, LoginStatus } = require('../../models');
 
 module.exports = async (req, res, next) => {
   const { authorization } = req.headers;
@@ -7,12 +7,7 @@ module.exports = async (req, res, next) => {
 
   // CHECK REQUEST HEADERS
   if (!authorization) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Super Admin Middleware',
-      status: 'error',
-      message: `Authorization not found! (target: ${User})`,
-    });
+    await LogsCreator(null, null, 'Super Admin Middleware', 'error', 'Authorization not found!');
 
     return res.status(401).json({
       status: 'error',
@@ -21,100 +16,70 @@ module.exports = async (req, res, next) => {
   }
 
   const administrationAccount = await AdministrationAccount.findOne({
-    where: { username: User },
+    where: { uidAdministrationAccount: User },
   });
 
   // CHECK ADMINISTRATION ACCOUNT IS EXIST
   if (!administrationAccount) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Super Admin Middleware',
-      status: 'error',
-      message: `This account not found! (target: ${User})`,
-    });
+    await LogsCreator(User, null, 'Super Admin Middleware', 'error', 'This administration account not found!');
 
     return res.status(404).json({
       status: 'error',
-      message: 'This account not found!',
+      message: 'This administration account not found!',
     });
   }
 
   // CHECK ADMINISTRATION ACCOUNT HAVE THIS PERMISSION
   if (administrationAccount.role !== 'super-admin') {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Super Admin Middleware',
-      status: 'error',
-      message: `This account not have authorization for this API endpoint! (target: ${User})`,
-    });
+    await LogsCreator(User, null, 'Super Admin Middleware', 'error', 'This administration account doesn\'t have authorization fot this endpoint!');
 
     return res.status(401).json({
       status: 'error',
-      message: 'This account not have authorization for this API endpoint!',
+      message: 'This administration account doesn\'t have authorization fot this endpoint!',
     });
   }
 
   const loginStatus = await LoginStatus.findOne({
-    where: { uidAdministrationAccount: administrationAccount.uid },
+    where: { uidAdministrationAccount: administrationAccount.uidAdministrationAccount },
   });
 
   // CHECK LOGIN STATUS IS EXIST
   if (!loginStatus) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Super Admin Middleware',
-      status: 'error',
-      message: `Login status this account not found! (target: ${User})`,
-    });
+    await LogsCreator(User, null, 'Super Admin Middleware', 'error', 'This administration account doesn\'t have login status!');
 
     return res.status(404).json({
       status: 'error',
-      message: 'Login status this account not found!',
+      message: 'This administration account doesn\'t have login status',
     });
   }
 
   // CHECK LOGIN STATUS IS ACTIVE
   if (administrationAccount.status === 'inactive') {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Super Admin Middleware',
-      status: 'error',
-      message: `This account status is inactive! (target: ${User})`,
-    });
+    await LogsCreator(User, null, 'Super Admin Middleware', 'error', 'This administration account status is inactive!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'This account status is inactive!',
+      message: 'This administration account status is inactive!',
     });
   }
 
   // CHECK LOGIN STATUS IS LOGGED IN
   if (!loginStatus.loggedIn) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Super Admin Middleware',
-      status: 'error',
-      message: `This account not logged in on any device! (target: ${User})`,
-    });
+    await LogsCreator(User, null, 'Super Admin Middleware', 'error', 'This administration account isn\'t currently logged in on any device!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'This account not logged in on any device!',
+      message: 'This administration account isn\'t currently logged in on any device',
     });
   }
 
   // CHECK ADMINISTRATION ACCOUNT NOT UPDATED LATELY
   if (loginStatus.lastUpdate.toString() !== administrationAccount.updatedAt.toString()) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Super Admin Middleware',
-      status: 'error',
-      message: `This account recently updated, please re-login! (target: ${User})`,
-    });
+    await LogsCreator(User, null, 'Super Admin Middleware', 'error', 'This administration account recently updated, please re-login!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'This account recently updated, please re-login!',
+      message: 'This administration account recently updated, please re-login',
     });
   }
 

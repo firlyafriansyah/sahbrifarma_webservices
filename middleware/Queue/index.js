@@ -1,6 +1,6 @@
-const { Decryptor } = require('../../utils');
+const { Decryptor, LogsCreator } = require('../../utils');
 const {
-  AdministrationAccount, Logs, LoginStatus,
+  AdministrationAccount, LoginStatus,
 } = require('../../models');
 
 module.exports = async (req, res, next) => {
@@ -10,12 +10,7 @@ module.exports = async (req, res, next) => {
 
   // CHECK REQUEST HEADERS
   if (!authorization) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Queue Middleware',
-      status: 'error',
-      message: `Authorization not found! (target: ${User})`,
-    });
+    await LogsCreator(null, null, 'Queue Middleware', 'error', 'Authorization not found!');
 
     return res.status(404).json({
       status: 'error',
@@ -24,17 +19,12 @@ module.exports = async (req, res, next) => {
   }
 
   const administrationAccount = await AdministrationAccount.findOne({
-    where: { username: User },
+    where: { uidAdministrationAccount: User },
   });
 
   // CHECK ADMINISTRATION ACCOUNT IS EXIST
   if (!administrationAccount) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Queue Middleware',
-      status: 'error',
-      message: `This administration account not found! (target: ${User})`,
-    });
+    await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account not found!');
 
     return res.status(404).json({
       status: 'error',
@@ -47,71 +37,46 @@ module.exports = async (req, res, next) => {
     if (administrationAccount.role === 'frontdesk') {
       if (currentStatus === 'out_of_queue') {
         if (newStatus !== 'in_medical_test_queue' && newStatus !== 'in_pharmacist_queue') {
-          await Logs.create({
-            administrationAccount: User || 'Guest',
-            action: 'Queue Middleware',
-            status: 'error',
-            message: `This administration account not authorize for this action! (target: ${User})`,
-          });
+          await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account doesn\'t have authorization for this endpoint!');
 
           return res.status(401).json({
             status: 'error',
-            message: 'This administration account not authorize for this action!',
+            message: 'This administration account doesn\'t have authorization for this endpoint!',
           });
         }
       } else {
-        await Logs.create({
-          administrationAccount: User || 'Guest',
-          action: 'Queue Middleware',
-          status: 'error',
-          message: `This administration account not authorize for this action! (target: ${User})`,
-        });
+        await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account doesn\'t have authorization for this endpoint!');
 
         return res.status(401).json({
           status: 'error',
-          message: 'This administration account not authorize for this action!',
+          message: 'This administration account doesn\'t have authorization for this endpoint!',
         });
       }
     } else if (administrationAccount.role === 'nurse') {
       if (currentStatus !== 'in_medical_test_queue' && newStatus !== 'in_doctoral_consultation_queue') {
-        await Logs.create({
-          administrationAccount: User || 'Guest',
-          action: 'Queue Middleware',
-          status: 'error',
-          message: `This administration account not authorize for this action! (target: ${User})`,
-        });
+        await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account doesn\'t have authorization for this endpoint!');
 
         return res.status(401).json({
           status: 'error',
-          message: 'This administration account not authorize for this action!',
+          message: 'This administration account doesn\'t have authorization for this endpoint!',
         });
       }
     } else if (administrationAccount.role === 'doctor') {
       if (currentStatus !== 'in_doctoral_consultation_queue' && newStatus !== 'in_pharmacist_queue') {
-        await Logs.create({
-          administrationAccount: User || 'Guest',
-          action: 'Queue Middleware',
-          status: 'error',
-          message: `This administration account not authorize for this action! (target: ${User})`,
-        });
+        await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account doesn\'t have authorization for this endpoint!');
 
         return res.status(401).json({
           status: 'error',
-          message: 'This administration account not authorize for this action!',
+          message: 'This administration account doesn\'t have authorization for this endpoint!',
         });
       }
     } else if (administrationAccount.role === 'pharmacist') {
       if (currentStatus !== 'in_pharmacist_queue' && newStatus !== 'out_of_queue') {
-        await Logs.create({
-          administrationAccount: User || 'Guest',
-          action: 'Queue Middleware',
-          status: 'error',
-          message: `This administration account not authorize for this action! (target: ${User})`,
-        });
+        await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account doesn\'t have authorization for this endpoint!');
 
         return res.status(401).json({
           status: 'error',
-          message: 'This administration account not authorize for this action!',
+          message: 'This administration account doesn\'t have authorization for this endpoint!',
         });
       }
     }
@@ -123,27 +88,17 @@ module.exports = async (req, res, next) => {
 
   // CHECK LOGIN STATUS IS EXIST
   if (!loginStatus) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Logout Middleware',
-      status: 'error',
-      message: `Login status this account not found! (target: ${User})`,
-    });
+    await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account isn\'t have login status!');
 
     return res.status(404).json({
       status: 'error',
-      message: 'Login status this account not found!',
+      message: 'This administration account isn\'t have login status!',
     });
   }
 
   // CHECK LOGIN STATUS IS ACTIVE
   if (administrationAccount.status === 'inactive') {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Logout Middleware',
-      status: 'error',
-      message: `This account status is inactive! (target: ${User})`,
-    });
+    await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account status is inactive!');
 
     return res.status(409).json({
       status: 'error',
@@ -153,16 +108,21 @@ module.exports = async (req, res, next) => {
 
   // CHECK LOGIN STATUS IS LOGGED IN
   if (!loginStatus.loggedIn) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Doctor Middleware',
-      status: 'error',
-      message: `This account not logged in on any device! (target: ${User})`,
-    });
+    await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account isn\'t currently logged in on any device!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'This account not logged in on any device!',
+      message: 'This administration account isn\'t currently logged in on any device!',
+    });
+  }
+
+  // CHECK ADMINISTRATION ACCOUNT NOT UPDATED LATELY
+  if (loginStatus.lastUpdate.toString() !== administrationAccount.updatedAt.toString()) {
+    await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account recently updated, please re-login!');
+
+    return res.status(409).json({
+      status: 'error',
+      message: 'This administration account recently updated, please re-login!',
     });
   }
 
