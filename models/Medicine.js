@@ -13,15 +13,24 @@ module.exports = (sequelize, DataTypes) => {
     },
     medicine: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     preparations: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     dosage: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     rules: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM,
+      values: ['requested', 'prepared', 'finished'],
+      allowNull: false,
     },
     createdAt: {
       field: 'created_at',

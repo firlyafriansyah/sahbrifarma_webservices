@@ -28,6 +28,11 @@ module.exports = {
         allowNull: false,
       },
     });
+    await queryInterface.addConstraint('login_status', {
+      type: 'unique',
+      fields: ['uid_administration_account'],
+      name: 'UNIQUE_UID_ADMINISTRATION_ACCOUNT',
+    });
   },
 
   down: async (queryInterface) => {

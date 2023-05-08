@@ -13,15 +13,24 @@ module.exports = {
       },
       medicine: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       preparations: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       dosage: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       rules: {
         type: Sequelize.STRING,
+        allowNull: false,
+      },
+      status: {
+        type: Sequelize.ENUM,
+        values: ['requested', 'prepared', 'finished'],
+        allowNull: false,
       },
       created_at: {
         type: Sequelize.DATE,

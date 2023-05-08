@@ -38,6 +38,11 @@ module.exports = {
         allowNull: false,
       },
     });
+    await queryInterface.addConstraint('patient_identity', {
+      type: 'unique',
+      fields: ['uid'],
+      name: 'UNIQUE_UID_PATIENT',
+    });
   },
 
   down: async (queryInterface) => {

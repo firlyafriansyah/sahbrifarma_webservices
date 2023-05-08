@@ -22,8 +22,8 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       type: DataTypes.ENUM,
       values: ['active', 'inactive'],
-      allowNull: false,
       defaultValue: 'active',
+      allowNull: false,
     },
     createdAt: {
       field: 'created_at',
