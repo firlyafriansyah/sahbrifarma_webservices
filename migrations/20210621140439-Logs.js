@@ -7,11 +7,11 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
       },
-      uid_administration_account: {
-        type: Sequelize.INTEGER,
+      uid_executor: {
+        type: Sequelize.STRING(20),
       },
-      uid_patient: {
-        type: Sequelize.STRING(14),
+      uid_target: {
+        type: Sequelize.STRING(20),
       },
       action: {
         type: Sequelize.STRING(50),

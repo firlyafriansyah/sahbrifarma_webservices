@@ -1,9 +1,9 @@
 const { Logs } = require('../../models');
 
-const LogsCreator = async (uidAdministrationAccount, uidPatient, action, status, message) => {
+const LogsCreator = async (uidExecutor, uidTarget, action, status, message) => {
   const createLogs = await Logs.create({
-    uidAdministrationAccount,
-    uidPatient,
+    uidExecutor: uidExecutor.toString(),
+    uidTarget: uidTarget.toString(),
     action,
     status,
     message,

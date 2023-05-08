@@ -1,22 +1,18 @@
-const { AdministrationAccount, Logs, LoginStatus } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { AdministrationAccount, LoginStatus } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
+
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);
 
   const administrationAccount = await AdministrationAccount.findOne({
-    where: { uid },
+    where: { uidAdministrationAccount: uid },
   });
 
   if (!administrationAccount) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Actived Administration Account',
-      status: 'error',
-      message: `Administration account not found! (target: ${uid})`,
-    });
+    await LogsCreator(User, administrationAccount.uidAdministrationAccount, 'Actived Administration Account', 'error', 'Administration Account not found!');
 
     return res.status(404).json({
       status: 'error',
@@ -25,66 +21,46 @@ module.exports = async (req, res) => {
   }
 
   if (administrationAccount.role === 'super-admin') {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Actived Administration Account',
-      status: 'error',
-      message: `This account is super admin account, you can't disabled/actived super admin! (target: ${uid})`,
-    });
+    await LogsCreator(User, administrationAccount.uidAdministrationAccount, 'Actived Administration Account', 'error', 'Can\'t actived administration account with role super admin!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'This account is super admin account, you can\'t disabled/actived super admin!',
+      message: 'Can\'t actived administration account with role super admin!',
     });
   }
 
   const loginStatus = await LoginStatus.findOne({
-    where: { uidAdministrationAccount: administrationAccount.uid },
+    where: { uidAdministrationAccount: administrationAccount.uidAdministrationAccount },
   });
 
   if (!loginStatus) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Actived Administration Account',
-      status: 'error',
-      message: `Login Status for this administration account not found! (target: ${uid})`,
-    });
+    await LogsCreator(User, administrationAccount.uidAdministrationAccount, 'Actived Administration Account', 'error', 'This administration account doesn\'t have login status!');
 
     return res.status(404).json({
       status: 'error',
-      message: 'Login Status for this administration account not found!',
+      message: 'This administration account doesn\'t have login status!',
     });
   }
 
   if (administrationAccount.status === 'active') {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Actived Administration Account',
-      status: 'error',
-      message: `This administration account already on active status! (target: ${uid})`,
-    });
+    await LogsCreator(User, administrationAccount.uidAdministrationAccount, 'Actived Administration Account', 'error', 'This administration account already has an active status!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'This administration account already on active status!',
+      message: 'This administration account already has an active status!',
     });
   }
 
-  const disabledAdministrationAccount = await administrationAccount.update({
+  const activedAdministrationAccount = await administrationAccount.update({
     status: 'active',
   });
 
-  if (!disabledAdministrationAccount) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Actived Administration Account',
-      status: 'error',
-      message: `Actived administration account failed! (target: ${uid})`,
-    });
+  if (!activedAdministrationAccount) {
+    await LogsCreator(User, administrationAccount.uidAdministrationAccount, 'Actived Administration Account', 'error', 'Actived this administration account failed!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'Actived administration account failed!',
+      message: 'Actived this administration account failed!',
     });
   }
 
@@ -93,12 +69,7 @@ module.exports = async (req, res) => {
   });
 
   if (!updateLoginStatus) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Actived Administration Account',
-      status: 'error',
-      message: `Updated login status for this administration account failed! (target: ${uid})`,
-    });
+    await LogsCreator(User, administrationAccount.uidAdministrationAccount, 'Actived Administration Account', 'error', 'Updated login status for this administration account failed!');
 
     return res.status(409).json({
       status: 'error',
@@ -106,15 +77,10 @@ module.exports = async (req, res) => {
     });
   }
 
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Actived Administration Account',
-    status: 'success',
-    message: `Administration account succesfully actived! (target: ${uid})`,
-  });
+  await LogsCreator(User, administrationAccount.uidAdministrationAccount, 'Actived Administration Account', 'success', 'Successfully actived this administration account!');
 
   return res.json({
     status: 'success',
-    message: 'Administration account succesfully actived!',
+    message: 'Successfully actived this administration account!',
   });
 };

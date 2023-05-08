@@ -7,13 +7,13 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false,
     },
-    uidAdministrationAccount: {
-      field: 'uid_administration_account',
-      type: DataTypes.INTEGER,
+    uidExecutor: {
+      field: 'uid_executor',
+      type: DataTypes.STRING(20),
     },
-    uidPatient: {
-      field: 'uid_patient',
-      type: DataTypes.STRING(14),
+    uidTarget: {
+      field: 'uid_target',
+      type: DataTypes.STRING(20),
     },
     action: {
       type: DataTypes.STRING(50),
