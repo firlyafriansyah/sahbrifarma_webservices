@@ -1,17 +1,12 @@
-const { AdministrationAccount, Logs, LoginStatus } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { AdministrationAccount, LoginStatus } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { authentication } = req.headers;
-  const { Head, Tail } = Decryptor(authentication, 'authentication');
+  const { Uid, Pass } = Decryptor(authentication, 'authentication');
 
   if (!authentication) {
-    await Logs.create({
-      administrationAccount: Head || 'Guest',
-      action: 'Super Admin Middleware',
-      status: 'error',
-      message: `Authentication not found! (target: ${Head})`,
-    });
+    await LogsCreator(null, Uid, 'Auto Login', 'error', 'Authentication not found!');
 
     return res.status(401).json({
       status: 'error',
@@ -20,94 +15,64 @@ module.exports = async (req, res) => {
   }
 
   const administrationAccount = await AdministrationAccount.findOne({
-    where: { username: Head },
+    where: { uidAdministrationAccount: Uid },
   });
 
   if (!administrationAccount) {
-    await Logs.create({
-      administrationAccount: Head || 'Guest',
-      action: 'Auto Login',
-      status: 'error',
-      message: `Administration account not found! (target: ${Head})`,
-    });
+    await LogsCreator(null, Uid, 'Auto Login', 'error', 'This administration account not found!');
 
     return res.status(404).json({
       status: 'error',
-      message: 'Administration account not found!',
+      message: 'This administration account not found!',
     });
   }
 
-  if (Tail !== administrationAccount.password) {
-    await Logs.create({
-      administrationAccount: Head || 'Guest',
-      action: 'Auto Login',
-      status: 'error',
-      message: `Password not match with this account! (target: ${Head})`,
-    });
+  if (Pass !== administrationAccount.password) {
+    await LogsCreator(null, Uid, 'Auto Login', 'error', 'Password not match with this administration account!');
 
     return res.status(406).json({
       status: 'error',
-      message: 'Password not match with this account!',
+      message: 'Password not match with this administration account!',
     });
   }
 
   if (administrationAccount.status === 'inactive') {
-    await Logs.create({
-      administrationAccount: Head || 'Guest',
-      action: 'Auto Login',
-      status: 'error',
-      message: `This account on inactive status! (target: ${Head})`,
-    });
+    await LogsCreator(null, Uid, 'Auto Login', 'error', 'This administration account status is inactive!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'This account on inactive status!',
+      message: 'This administration account status is inactive!',
     });
   }
 
   const loginStatus = await LoginStatus.findOne({
-    where: { uidAdministrationAccount: administrationAccount.uid },
+    where: { uidAdministrationAccount: administrationAccount.uidAdministrationAccount },
   });
 
   if (!loginStatus) {
-    await Logs.create({
-      administrationAccount: Head || 'Guest',
-      action: 'Auto Login',
-      status: 'error',
-      message: `Login status for this administration account not found! (target: ${Head})`,
-    });
+    await LogsCreator(null, Uid, 'Auto Login', 'error', 'This administration account doesn\'t have login status!');
 
     return res.status(404).json({
       status: 'error',
-      message: 'Login status for this administration account not found!',
+      message: 'This administration account doesn\'t have login status!',
     });
   }
 
   if (!loginStatus.loggedIn) {
-    await Logs.create({
-      administrationAccount: Head || 'Guest',
-      action: 'Auto Login',
-      status: 'error',
-      message: `This account is not logged in on any device! (target: ${Head})`,
-    });
+    await LogsCreator(null, Uid, 'Auto Login', 'error', 'This administration account isn\'t currently logged in on any device!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'This account is not logged in on any device!',
+      message: 'This administration account isn\'t currently logged in on any device!',
     });
   }
 
   if (administrationAccount.updatedAt.toString() !== loginStatus.lastUpdate.toString()) {
-    await Logs.create({
-      administrationAccount: Head || 'Guest',
-      action: 'Auto Login',
-      status: 'error',
-      message: `This account recently updated, please re-login! (target: ${Head})`,
-    });
+    await LogsCreator(null, Uid, 'Auto Login', 'error', 'This administration account recently updated, please re-login!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'This account recently updated, please re-login!',
+      message: 'This administration account recently updated, please re-login',
     });
   }
 
@@ -115,12 +80,7 @@ module.exports = async (req, res) => {
     loggedIn: true,
   });
 
-  await Logs.create({
-    administrationAccount: Head || 'Guest',
-    action: 'Auto Login',
-    status: 'success',
-    message: `Login success! (target: ${Head})`,
-  });
+  await LogsCreator(null, Uid, 'Auto Login', 'success', 'This administration account successfully login with auto login!');
 
   return res.json({
     status: 'success',
