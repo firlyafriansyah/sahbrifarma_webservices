@@ -8,12 +8,12 @@ const Decryptor = (text, type = 'authorization') => {
     const User = parseInt(bytes.toString(CryptoJS.enc.Utf8), 10);
 
     if (type === 'authentication') {
-      const Head = parseInt(User.split('?')[0], 10);
-      const Tail = User.split('?')[1];
+      const Uid = parseInt(User.split('?')[0], 10);
+      const Pass = User.split('?')[1];
 
       return {
-        Head,
-        Tail,
+        Uid,
+        Pass,
       };
     }
 
