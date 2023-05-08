@@ -1,13 +1,14 @@
 module.exports = (sequelize, DataTypes) => {
   const AdministrationAccount = sequelize.define('AdministrationAccount', {
-    uid: {
+    uidAdministrationAccount: {
+      field: 'uid_administration_account',
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
     username: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(20),
       allowNull: false,
     },
     password: {

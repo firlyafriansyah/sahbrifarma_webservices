@@ -1,18 +1,20 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('logs', {
-      uid: {
+      uid_logs: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
-      administration_account: {
-        type: Sequelize.STRING,
-        allowNull: false,
+      uid_administration_account: {
+        type: Sequelize.INTEGER,
+      },
+      uid_patient: {
+        type: Sequelize.STRING(14),
       },
       action: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
         allowNull: false,
       },
       status: {
@@ -21,7 +23,7 @@ module.exports = {
         allowNull: false,
       },
       message: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT('long'),
         allowNull: false,
       },
       created_at: {

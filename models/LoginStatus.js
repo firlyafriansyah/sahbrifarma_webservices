@@ -1,6 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const LoginStatus = sequelize.define('LoginStatus', {
-    uid: {
+    uidLoginStatus: {
+      field: 'uid_login_status',
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,

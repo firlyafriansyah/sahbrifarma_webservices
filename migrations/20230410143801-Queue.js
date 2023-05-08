@@ -1,18 +1,18 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('queue', {
-      uid: {
+      uid_queue: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
       uid_patient: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(14),
         allowNull: false,
       },
       patient_name: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(100),
         allowNull: false,
       },
       status: {

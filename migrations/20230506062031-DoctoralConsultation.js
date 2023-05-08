@@ -1,14 +1,14 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('doctoral_consulation', {
-      uid: {
+    await queryInterface.createTable('doctoral_consultation', {
+      uid_doctoral_consultation: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
       uid_patient: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(14),
         allowNull: false,
       },
       allergies: {
@@ -16,12 +16,14 @@ module.exports = {
       },
       anamnesis: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       diagnosis: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       notes: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT('long'),
       },
       created_at: {
         type: Sequelize.DATE,
@@ -35,6 +37,6 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable('doctoral_consulation');
+    await queryInterface.dropTable('doctoral_consultation');
   },
 };

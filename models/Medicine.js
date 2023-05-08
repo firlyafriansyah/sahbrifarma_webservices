@@ -1,6 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Medicine = sequelize.define('Medicine', {
-    uid: {
+    uidMedicine: {
+      field: 'uid_medicine',
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
@@ -8,23 +9,23 @@ module.exports = (sequelize, DataTypes) => {
     },
     uidPatient: {
       field: 'uid_patient',
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(14),
       allowNull: false,
     },
     medicine: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
-    preparations: {
-      type: DataTypes.STRING,
+    preparation: {
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
     dosage: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
     rules: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
     status: {

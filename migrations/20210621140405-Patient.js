@@ -1,13 +1,13 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('patient_identity', {
-      uid: {
-        type: Sequelize.STRING,
+    await queryInterface.createTable('patient', {
+      uid_patient: {
+        type: Sequelize.STRING(14),
         primaryKey: true,
         allowNull: false,
       },
       name: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(100),
         allowNull: false,
       },
       address: {
@@ -15,13 +15,13 @@ module.exports = {
         allowNull: false,
       },
       phone_number: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(14),
       },
       emergency_phone_number: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(14),
       },
       date_of_birth: {
-        type: Sequelize.STRING,
+        type: Sequelize.DATE,
         allowNull: false,
       },
       sex: {
@@ -38,14 +38,14 @@ module.exports = {
         allowNull: false,
       },
     });
-    await queryInterface.addConstraint('patient_identity', {
+    await queryInterface.addConstraint('patient', {
       type: 'unique',
-      fields: ['uid'],
+      fields: ['uid_patient'],
       name: 'UNIQUE_UID_PATIENT',
     });
   },
 
   down: async (queryInterface) => {
-    await queryInterface.dropTable('patient_identity');
+    await queryInterface.dropTable('patient');
   },
 };

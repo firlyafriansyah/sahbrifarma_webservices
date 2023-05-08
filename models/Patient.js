@@ -1,12 +1,13 @@
 module.exports = (sequelize, DataTypes) => {
-  const PatientIdentity = sequelize.define('PatientIdentity', {
-    uid: {
-      type: DataTypes.STRING,
+  const Patient = sequelize.define('Patient', {
+    uidPatient: {
+      field: 'uid_patient',
+      type: DataTypes.STRING(14),
       primaryKey: true,
       allowNull: false,
     },
     name: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     address: {
@@ -15,15 +16,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     phoneNumber: {
       field: 'phone_number',
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(14),
     },
     emergencyPhoneNumber: {
       field: 'emergency_phone_number',
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(14),
     },
     dateOfBirth: {
       field: 'date_of_birth',
-      type: DataTypes.STRING,
+      type: DataTypes.DATE,
       allowNull: false,
     },
     sex: {
@@ -42,9 +43,9 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
   }, {
-    tableName: 'patient_identity',
+    tableName: 'patient',
     timestamps: true,
   });
 
-  return PatientIdentity;
+  return Patient;
 };

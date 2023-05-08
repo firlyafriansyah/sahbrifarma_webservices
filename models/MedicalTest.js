@@ -1,6 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const MedicalTest = sequelize.define('MedicalTest', {
-    uid: {
+    uidMedicalTest: {
+      field: 'uid_medical_test',
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
@@ -8,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     uidPatient: {
       field: 'uid_patient',
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(14),
       allowNull: false,
     },
     bodyHeight: {
@@ -23,9 +24,9 @@ module.exports = (sequelize, DataTypes) => {
       field: 'body_parameter',
       type: DataTypes.FLOAT,
     },
-    bloodPreasure: {
-      field: 'blood_preasure',
-      type: DataTypes.STRING,
+    bloodPressure: {
+      field: 'blood_pressure',
+      type: DataTypes.STRING(10),
     },
     bloodSugar: {
       field: 'blood_sugar',

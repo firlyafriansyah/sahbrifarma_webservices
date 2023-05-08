@@ -1,14 +1,14 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('medical_test', {
-      uid: {
+      uid_medical_test: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
       uid_patient: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(14),
         allowNull: false,
       },
       body_height: {
@@ -20,8 +20,8 @@ module.exports = {
       body_temperature: {
         type: Sequelize.FLOAT,
       },
-      blood_preasure: {
-        type: Sequelize.STRING,
+      blood_pressure: {
+        type: Sequelize.STRING(10),
       },
       blood_sugar: {
         type: Sequelize.FLOAT,
