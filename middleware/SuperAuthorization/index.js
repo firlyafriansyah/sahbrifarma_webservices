@@ -6,7 +6,7 @@ module.exports = async (req, res, next) => {
   const { User } = Decryptor(authorization);
 
   // CHECK REQUEST HEADERS
-  if (!authorization) {
+  if (!authorization || !User) {
     await LogsCreator(null, null, 'Super Admin Middleware', 'error', 'Authorization not found!');
 
     return res.status(401).json({

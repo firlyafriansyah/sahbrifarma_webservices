@@ -13,7 +13,7 @@ router.get('/', middleware.SuperAuthorization, administrationHandler.GetAdminist
 router.get('/detail/:uid', middleware.SuperAuthorization, administrationHandler.GetAdministrationAccount);
 router.put('/update/:uid', middleware.SuperAuthorization, administrationHandler.UpdateAdministrationAccount);
 router.put('/disabled/:uid', middleware.SuperAuthorization, administrationHandler.DisabledAdministrationAccount);
-router.put('/actived/:uid', middleware.SuperAuthorization, administrationHandler.ActivedAdministrationAccount);
+router.put('/actived/:uid', middleware.SuperAuthorization, administrationHandler.ActivatedAdministrationAccount);
 router.delete('/delete/:uid', middleware.SuperAuthorization, administrationHandler.DeleteAdministrationAccount);
 
 module.exports = router;

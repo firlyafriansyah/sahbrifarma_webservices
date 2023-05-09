@@ -1,13 +1,15 @@
 const { Logs } = require('../../models');
 
 const LogsCreator = async (uidExecutor, uidTarget, action, status, message) => {
-  const createLogs = await Logs.create({
-    uidExecutor: uidExecutor.toString(),
-    uidTarget: uidTarget.toString(),
+  const data = {
+    uidExecutor: uidExecutor ? uidExecutor.toString() : null,
+    uidTarget: uidTarget ? uidTarget.toString() : null,
     action,
     status,
     message,
-  });
+  };
+
+  const createLogs = await Logs.create(data);
 
   if (!createLogs) {
     return {
