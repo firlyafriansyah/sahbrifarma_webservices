@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
   try {
     return await sequelize.transaction(async (t) => {
       const administrationAccount = await AdministrationAccount.findOne({
-        where: { uid },
+        where: { uidAdministrationAccount: uid },
       }, { transaction: t, lock: true });
 
       if (!administrationAccount) {
