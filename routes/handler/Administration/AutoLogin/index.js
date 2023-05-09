@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   const { Uid, Pass } = Decryptor(authentication, 'authentication');
 
   if (!authentication) {
-    await LogsCreator(null, Uid, 'Auto Login', 'error', 'Authentication not found!');
+    await LogsCreator(null, null, 'Auto Login', 'error', 'Authentication not found!');
 
     return res.status(401).json({
       status: 'error',

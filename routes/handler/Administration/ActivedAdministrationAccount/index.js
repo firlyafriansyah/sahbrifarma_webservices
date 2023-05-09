@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
   });
 
   if (!administrationAccount) {
-    await LogsCreator(User, administrationAccount.uidAdministrationAccount, 'Actived Administration Account', 'error', 'Administration Account not found!');
+    await LogsCreator(User, uid, 'Actived Administration Account', 'error', 'Administration Account not found!');
 
     return res.status(404).json({
       status: 'error',
@@ -21,11 +21,11 @@ module.exports = async (req, res) => {
   }
 
   if (administrationAccount.role === 'super-admin') {
-    await LogsCreator(User, administrationAccount.uidAdministrationAccount, 'Actived Administration Account', 'error', 'Can\'t actived administration account with role super admin!');
+    await LogsCreator(User, administrationAccount.uidAdministrationAccount, 'Actived Administration Account', 'error', 'Can\'t actived administration account with super admin role!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'Can\'t actived administration account with role super admin!',
+      message: 'Can\'t actived administration account with super admin role!',
     });
   }
 
