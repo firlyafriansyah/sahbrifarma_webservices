@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
-const { AdministrationAccount, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { AdministrationAccount } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { authorization } = req.headers;
@@ -12,25 +12,10 @@ module.exports = async (req, res) => {
   });
 
   if (!administrationAccount) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Get All Administration Account',
-      status: 'error',
-      message: 'Administration account list not found!',
-    });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Administration account list not found!',
-    });
+    throw new Error('Administration account list not found!');
   }
 
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Get All Administration Account',
-    status: 'success',
-    message: 'Get administration account list success!',
-  });
+  await LogsCreator(User, null, 'Get Administration List', 'success', 'Successfully get administration list!');
 
   return res.json({
     status: 'success',

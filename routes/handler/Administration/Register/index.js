@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const Validator = require('fastest-validator');
-const { Decryptor } = require('../../../../utils');
-const { AdministrationAccount, Logs, LoginStatus } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
+const { AdministrationAccount, LoginStatus } = require('../../../../models');
 
 const v = new Validator();
 
@@ -28,17 +28,7 @@ module.exports = async (req, res) => {
   });
 
   if (administrationAccount) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Register',
-      status: 'error',
-      message: `This username already used! (target: ${req.body.username})`,
-    });
-
-    return res.status(409).json({
-      status: 'error',
-      message: 'This username already used!',
-    });
+    throw new Error('This username already used by another administration account!');
   }
 
   const password = await bcrypt.hash(req.body.password, 10);
@@ -51,17 +41,7 @@ module.exports = async (req, res) => {
   });
 
   if (!createAdministrationAccount) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Register',
-      status: 'error',
-      message: `Failed register for this account! (target: ${req.body.username})`,
-    });
-
-    return res.status(409).json({
-      status: 'error',
-      message: 'Failed register for this account!',
-    });
+    throw new Error('Failed registered this administration account!');
   }
 
   const createLoginStatus = await LoginStatus.create({
@@ -70,25 +50,10 @@ module.exports = async (req, res) => {
   });
 
   if (!createLoginStatus) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Register',
-      status: 'error',
-      message: `Failed create login status for this account! (target: ${req.body.username})`,
-    });
-
-    return res.status(409).json({
-      status: 'error',
-      message: 'Failed create login status for this account!',
-    });
+    throw new Error('Failed created login status for this administration account!');
   }
 
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Register',
-    status: 'success',
-    message: `Administration account successfully registered! (target: ${req.body.username})`,
-  });
+  await LogsCreator(User, null, 'Register Administration Account', 'success', 'Successfully registered this administration account!');
 
   return res.json({
     status: 'success',
