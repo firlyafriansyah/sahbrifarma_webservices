@@ -1,5 +1,5 @@
-const { PatientIdentity, MedicalTest, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { Patient, MedicalTest, sequelize } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uidPatient } = req.params;
@@ -9,58 +9,44 @@ module.exports = async (req, res) => {
     bodyHeight, bodyWeight, bodyTemperature, bloodPressure, bloodSugar, uricAcid, cholesterol,
   } = req.body;
 
-  const patientIdentity = await PatientIdentity.findOne({
-    where: { uid: uidPatient },
-  });
+  try {
+    return await sequelize.transaction(async (t) => {
+      const patient = await Patient.findOne({
+        where: { uidPatient },
+      }, { transaction: t, lock: true });
 
-  if (!patientIdentity) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Created Medical Test',
-      status: 'error',
-      message: `Patient with this patient uid not found! (target: ${uidPatient})`,
+      if (!patient) {
+        throw new Error('This patient target not found!');
+      }
+
+      const createMedicalTest = await MedicalTest.create({
+        uidPatient,
+        bodyHeight,
+        bodyWeight,
+        bodyTemperature,
+        bloodPressure,
+        bloodSugar,
+        uricAcid,
+        cholesterol,
+      }, { transaction: t, lock: true });
+
+      if (!createMedicalTest) {
+        throw new Error('Failed create medical test for this patient target!');
+      }
+
+      await LogsCreator(User, uidPatient, 'Create Medical Test', 'success', 'Successfully created medical test for this patient target!');
+
+      return res.json({
+        status: 'success',
+        data: createMedicalTest,
+      });
     });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Patient with this patient uid not found!',
-    });
-  }
-
-  const createMedicalTest = await MedicalTest.create({
-    uidPatient,
-    bodyHeight,
-    bodyWeight,
-    bodyTemperature,
-    bloodPressure,
-    bloodSugar,
-    uricAcid,
-    cholesterol,
-  });
-
-  if (!createMedicalTest) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Created Medical Test',
-      status: 'error',
-      message: `Create medical test failed! (target: ${uidPatient})`,
-    });
+  } catch (error) {
+    await LogsCreator(User, uidPatient, 'Create Medical Test', 'error', error.message);
 
     return res.status(409).json({
       status: 'error',
-      message: 'Create medical test failed!',
+      message: error.message,
     });
   }
-
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Created Medical Test',
-    status: 'success',
-    message: `Create medical test success! (target: ${uidPatient})`,
-  });
-
-  return res.json({
-    status: 'success',
-    data: createMedicalTest,
-  });
 };

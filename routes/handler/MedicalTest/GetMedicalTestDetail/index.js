@@ -1,60 +1,47 @@
-const { MedicalTest, PatientIdentity, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { MedicalTest, Patient, sequelize } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
+
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);
 
-  const medicalTest = await MedicalTest.findOne({
-    where: { uid },
-  });
+  try {
+    return await sequelize.transaction(async (t) => {
+      const medicalTest = await MedicalTest.findOne({
+        where: { uid },
+      }, { transaction: t, lock: true });
 
-  if (!medicalTest) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Get Medical Test Detail',
-      status: 'error',
-      message: `Medical test with this uid not found! (target: ${uid})`,
+      if (!medicalTest) {
+        throw new Error('This medical test target not found!');
+      }
+
+      const patientIdentity = await Patient.findOne({
+        where: { uidPatient: medicalTest.uidPatient },
+        attributes: ['name', 'date_of_birth', 'sex'],
+      }, { transaction: t, lock: true });
+
+      if (!patientIdentity) {
+        throw new Error('Patient with this medical test target not found!');
+      }
+
+      await LogsCreator(User, uid, 'Get Medical Test Target', 'success', 'Successfully get medical test detail target!');
+
+      return res.json({
+        status: 'success',
+        data: {
+          patientIdentity,
+          medicalTest,
+        },
+      });
     });
+  } catch (error) {
+    await LogsCreator(User, uid, 'Get Medical Test Target', 'error', error.message);
 
-    return res.status(404).json({
+    return res.status(409).json({
       status: 'error',
-      message: 'Medical test with this uid not found!',
+      message: error.message,
     });
   }
-
-  const patientIdentity = await PatientIdentity.findOne({
-    where: { uid: medicalTest.uidPatient },
-    attributes: ['name', 'date_of_birth', 'sex'],
-  });
-
-  if (!patientIdentity) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Get Medical Test Detail',
-      status: 'error',
-      message: `Patient identity with this medical test uid patient not found! (target: ${medicalTest.uidPatient})`,
-    });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Patient identity with this medical test uid patient not found!',
-    });
-  }
-
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Get Medical Test Detail',
-    status: 'success',
-    message: `Get medical test detail success! (target: ${uid})`,
-  });
-
-  return res.json({
-    status: 'success',
-    data: {
-      patientIdentity,
-      medicalTest,
-    },
-  });
 };

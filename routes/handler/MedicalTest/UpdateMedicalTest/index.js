@@ -1,6 +1,6 @@
 const Validator = require('fastest-validator');
-const { MedicalTest, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { MedicalTest, sequelize } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 const v = new Validator();
 
@@ -30,57 +30,43 @@ module.exports = async (req, res) => {
     });
   }
 
-  const medicalTest = await MedicalTest.findOne({
-    where: { uid },
-  });
+  try {
+    return await sequelize.transaction(async (t) => {
+      const medicalTest = await MedicalTest.findOne({
+        where: { uid },
+      }, { transaction: t, lock: true });
 
-  if (!medicalTest) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Update Medical Test',
-      status: 'error',
-      message: `Medical test with this uid not found! (target: ${uid})`,
+      if (!medicalTest) {
+        throw new Error('This medical test target not found!');
+      }
+
+      const updateMedicalTest = await medicalTest.update({
+        bodyHeight,
+        bodyWeight,
+        bodyTemperature,
+        bloodPressure,
+        bloodSugar,
+        uricAcid,
+        cholesterol,
+      }, { transaction: t, lock: true });
+
+      if (!updateMedicalTest) {
+        throw new Error('Failed update this medical test target!');
+      }
+
+      await LogsCreator(User, uid, 'Update Medical Test', 'success', 'Successfully updated medical test target!');
+
+      return res.json({
+        status: 'success',
+        data: updateMedicalTest,
+      });
     });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Medical test with this uid not found!',
-    });
-  }
-
-  const updateMedicalTest = await medicalTest.update({
-    bodyHeight,
-    bodyWeight,
-    bodyTemperature,
-    bloodPressure,
-    bloodSugar,
-    uricAcid,
-    cholesterol,
-  });
-
-  if (!updateMedicalTest) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Update Medical Test',
-      status: 'error',
-      message: `Update medical test failed! (target: ${uid})`,
-    });
+  } catch (error) {
+    await LogsCreator(User, uid, 'Update Medical Test', 'error', error.message);
 
     return res.status(409).json({
       status: 'error',
-      message: 'Update medical test failed!',
+      message: error.message,
     });
   }
-
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Update Medical Test',
-    status: 'error',
-    message: `Update medical test success! (target: ${uid})`,
-  });
-
-  return res.json({
-    status: 'success',
-    data: updateMedicalTest,
-  });
 };

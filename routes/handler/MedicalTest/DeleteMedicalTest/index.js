@@ -1,54 +1,41 @@
-const { MedicalTest, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { MedicalTest, sequelize } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
+
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);
 
-  const medicalTest = await MedicalTest.findOne({
-    where: { uid },
-  });
+  try {
+    return await sequelize.transaction(async (t) => {
+      const medicalTest = await MedicalTest.findOne({
+        where: { uid },
+      }, { transaction: t, lock: true });
 
-  if (!medicalTest) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Delete Medical Test',
-      status: 'error',
-      message: `Medical test with this uid not found! (target: ${uid})`,
+      if (!medicalTest) {
+        throw new Error('This medical test target not found!');
+      }
+
+      const deleteMedicalTest = await medicalTest.destroy({ transaction: t, lock: true });
+
+      if (!deleteMedicalTest) {
+        throw new Error('Faield delete this medical test target!');
+      }
+
+      await LogsCreator(User, uid, 'Delete Medical Test', 'success', 'Successfully deleted this medical test target!');
+
+      return res.json({
+        status: 'success',
+        message: 'Successfully deleted this medical test target!',
+      });
     });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Medical test with this uid not found!',
-    });
-  }
-
-  const deleteMedicalTest = await medicalTest.destroy();
-
-  if (!deleteMedicalTest) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Delete Medical Test',
-      status: 'error',
-      message: `Delete this medical test failed! (target: ${uid})`,
-    });
+  } catch (error) {
+    await LogsCreator(User, uid, 'Delete Medical Test', 'error', error.message);
 
     return res.status(409).json({
       status: 'error',
-      message: 'Delete this medical test failed',
+      message: error.message,
     });
   }
-
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Delete Medical Test',
-    status: 'error',
-    message: `Delete this medical test success! (target: ${uid})`,
-  });
-
-  return res.json({
-    status: 'success',
-    message: 'Delete this medical test success!',
-  });
 };
