@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const Validator = require('fastest-validator');
-const { Decryptor } = require('../../../../utils');
-const { AdministrationAccount, Logs } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
+const { AdministrationAccount, sequelize } = require('../../../../models');
 
 const v = new Validator();
 
@@ -24,101 +24,67 @@ module.exports = async (req, res) => {
     });
   }
 
-  const administrationAccount = await AdministrationAccount.findOne({
-    where: { uid },
-  });
+  try {
+    return await sequelize.transaction(async (t) => {
+      const administrationAccount = await AdministrationAccount.findOne({
+        where: { uidAdministrationAccount: uid },
+      }, { transaction: t, lock: true });
 
-  if (!administrationAccount) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Update Administration Account Data',
-      status: 'error',
-      message: `Administration account not found! (target: ${uid})`,
+      if (!administrationAccount) {
+        throw new Error('This administration account target not found!');
+      }
+
+      if (administrationAccount.role === 'super-admin') {
+        throw new Error('Can\'t change any information on administration account with role super admin!');
+      }
+
+      const checkName = await AdministrationAccount.findOne({
+        where: { username: req.body.username },
+      }, { transaction: t, lock: true });
+
+      if (checkName && checkName.username !== administrationAccount.username) {
+        throw new Error('This username already used by another administration account!');
+      }
+
+      const password = await bcrypt.hash(req.body.password, 10);
+
+      if (
+        req.body.username === administrationAccount.username
+        && req.body.role === administrationAccount.role
+        && await bcrypt.compare(req.body.password, administrationAccount.password)
+      ) {
+        return res.json({
+          status: 'success',
+          message: 'Administration account data same with existing data!',
+        });
+      }
+
+      const updateAdministrationAccount = await administrationAccount.update({
+        password,
+        username: req.body.username,
+        role: req.body.role,
+      }, { transaction: t, lock: true });
+
+      if (!updateAdministrationAccount) {
+        throw new Error('Failed updated this administration account target!');
+      }
+
+      await LogsCreator(User, uid, 'Update Administration Account', 'success', 'This administration account target successfully updated!');
+
+      return res.json({
+        status: 'success',
+        data: {
+          username: updateAdministrationAccount.username,
+          role: updateAdministrationAccount.role,
+        },
+      });
     });
+  } catch (error) {
+    await LogsCreator(User, uid, 'Update Administration Account', 'error', error.message);
 
-    return res.status(404).json({
-      status: 'error',
-      message: 'Administration account not found!',
-    });
-  }
-
-  if (administrationAccount.role === 'super-admin') {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Update Administration Account Data',
-      status: 'error',
-      message: `This administration account have super admin role, you can't update or change anything on super admin account role! (target: ${uid})`,
-    });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'This administration account have super admin role, you can\'t update or change anything on super admin account role!',
-    });
-  }
-
-  const checkName = await AdministrationAccount.findOne({
-    where: { username: req.body.username },
-  });
-
-  if (checkName && checkName.username !== administrationAccount.username) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Update Administration Account Data',
-      status: 'error',
-      message: `This username already used! (target: ${uid}`,
-    });
-
-    return res.status(409).json({
-      status: 'error',
-      message: 'This username already used!',
-    });
-  }
-
-  const password = await bcrypt.hash(req.body.password, 10);
-
-  if (
-    req.body.username === administrationAccount.username
-    && req.body.role === administrationAccount.role
-    && await bcrypt.compare(req.body.password, administrationAccount.password)
-  ) {
     return res.json({
       status: 'success',
-      message: 'Administration account data same with existing data!',
+      message: error.message,
     });
   }
-
-  const updateAdministrationAccount = await administrationAccount.update({
-    password,
-    username: req.body.username,
-    role: req.body.role,
-  });
-
-  if (!updateAdministrationAccount) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Update Administration Account Data',
-      status: 'error',
-      message: `Administration account failed updated! (target: ${uid})`,
-    });
-
-    return res.status(409).json({
-      status: 'error',
-      message: 'Administration account failed updated!',
-    });
-  }
-
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Update Administration Account',
-    status: 'success',
-    message: `Update administration account successfully updated! (target: ${uid})`,
-  });
-
-  return res.json({
-    status: 'success',
-    data: {
-      username: updateAdministrationAccount.username,
-      role: updateAdministrationAccount.role,
-    },
-  });
 };

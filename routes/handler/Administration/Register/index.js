@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
   });
 
   if (administrationAccount) {
-    throw new Error('This username already used by another administration account!');
+    await LogsCreator(User, null, 'Register Administration Account', 'error', 'This username already used by another administration account!');
   }
 
   const password = await bcrypt.hash(req.body.password, 10);
@@ -41,7 +41,7 @@ module.exports = async (req, res) => {
   });
 
   if (!createAdministrationAccount) {
-    throw new Error('Failed registered this administration account!');
+    await LogsCreator(User, null, 'Register Administration Account', 'error', 'Failed registered this administration account!');
   }
 
   const createLoginStatus = await LoginStatus.create({
@@ -50,7 +50,7 @@ module.exports = async (req, res) => {
   });
 
   if (!createLoginStatus) {
-    throw new Error('Failed created login status for this administration account!');
+    await LogsCreator(User, null, 'Register Administration Account', 'error', 'Failed create login status for this administration account!');
   }
 
   await LogsCreator(User, null, 'Register Administration Account', 'success', 'Successfully registered this administration account!');

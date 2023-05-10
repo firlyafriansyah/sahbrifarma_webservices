@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
   });
 
   if (!administrationAccount) {
-    throw new Error('Administration account list not found!');
+    await LogsCreator(User, null, 'Get Administration List', 'error', 'Administration account list not found!');
   }
 
   await LogsCreator(User, null, 'Get Administration List', 'success', 'Successfully get administration list!');
