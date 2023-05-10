@@ -1,54 +1,42 @@
-const { DocotoralConsultation, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { DocotoralConsultation, sequelize } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);
 
-  const docotoralConsultation = await DocotoralConsultation.findOne({
-    where: { uid },
-  });
+  try {
+    return await sequelize.transaction(async (t) => {
+      const docotoralConsultation = await DocotoralConsultation.findOne({
+        where: { uidDoctoralConsultation: uid },
+      }, { transaction: t, lock: true });
 
-  if (!docotoralConsultation) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Delete Doctoral Consultation',
-      status: 'error',
-      message: `Doctoral consultation with this uid not found! (target: ${uid})`,
+      if (!docotoralConsultation) {
+        throw new Error('This doctoral consultation target not found!');
+      }
+
+      const deleteDoctoralConsultation = await docotoralConsultation.destroy({
+        transaction: t, lock: true,
+      });
+
+      if (!deleteDoctoralConsultation) {
+        throw new Error('Failed delete this doctoral consultation target!');
+      }
+
+      await LogsCreator(User, uid, 'Delete Doctoral Consultation', 'success', 'Successfully deleted this doctoral consultation target!');
+
+      return res.json({
+        status: 'success',
+        message: 'Successgully deleted this doctoral consultation target!',
+      });
     });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Doctoral consultation with this uid not found!',
-    });
-  }
-
-  const deleteDoctoralConsultation = await docotoralConsultation.destroy();
-
-  if (!deleteDoctoralConsultation) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Delete Doctoral Consultation',
-      status: 'error',
-      message: `Delete this doctoral consultation failed! (target: ${uid})`,
-    });
+  } catch (error) {
+    await LogsCreator(User, uid, 'Delete Doctoral Consultation', 'error', error.message);
 
     return res.status(409).json({
       status: 'error',
-      message: 'Delete this doctoral consultation failed!',
+      message: error.message,
     });
   }
-
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Delete Doctoral Consultation',
-    status: 'error',
-    message: `Delete this doctoral consultation success! (target: ${uid})`,
-  });
-
-  return res.json({
-    status: 'success',
-    message: 'Delete this doctoral consultation success!',
-  });
 };

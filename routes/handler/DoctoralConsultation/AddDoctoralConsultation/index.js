@@ -1,5 +1,5 @@
-const { PatientIdentity, DoctoralConsultation, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { PatientIdentity, DoctoralConsultation, sequelize } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uidPatient } = req.params;
@@ -9,55 +9,41 @@ module.exports = async (req, res) => {
     allergies, anamnesis, diagnosis, notes,
   } = req.body;
 
-  const patientIdentity = await PatientIdentity.findOne({
-    where: { uid: uidPatient },
-  });
+  try {
+    return await sequelize.transaction(async (t) => {
+      const patientIdentity = await PatientIdentity.findOne({
+        where: { uidPatient },
+      }, { transaction: t, lock: true });
 
-  if (!patientIdentity) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Created Doctoral Consultation',
-      status: 'error',
-      message: `Patient with this patient uid not found! (target: ${uidPatient})`,
+      if (!patientIdentity) {
+        throw new Error('This patient target not found');
+      }
+
+      const createDoctoralConsultation = await DoctoralConsultation.create({
+        uidPatient,
+        allergies,
+        anamnesis,
+        diagnosis,
+        notes,
+      }, { transaction: t, lock: true });
+
+      if (!createDoctoralConsultation) {
+        throw new Error('Failed create doctoral consultation for this patient target');
+      }
+
+      await LogsCreator(User, uidPatient, 'Create Doctoral Consultation', 'success', 'Seccussfully created doctoral consultation for this patient target!');
+
+      return res.json({
+        status: 'success',
+        data: createDoctoralConsultation,
+      });
     });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Patient with this patient uid not found!',
-    });
-  }
-
-  const createDoctoralConsultation = await DoctoralConsultation.create({
-    uidPatient,
-    allergies,
-    anamnesis,
-    diagnosis,
-    notes,
-  });
-
-  if (!createDoctoralConsultation) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Created Doctoral Consultation',
-      status: 'error',
-      message: `Create doctoral consultation test failed! (target: ${uidPatient})`,
-    });
+  } catch (error) {
+    await LogsCreator(User, uidPatient, 'Create Doctoral Consultation', 'error', error.message);
 
     return res.status(409).json({
       status: 'error',
-      message: 'Create doctoral consultation test failed!',
+      message: error.message,
     });
   }
-
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Created Doctoral Consultation',
-    status: 'success',
-    message: `Create doctoral consultation success! (target: ${uidPatient})`,
-  });
-
-  return res.json({
-    status: 'success',
-    data: createDoctoralConsultation,
-  });
 };

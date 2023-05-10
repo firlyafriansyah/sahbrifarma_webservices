@@ -1,60 +1,47 @@
-const { DoctoralConsultation, PatientIdentity, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { DoctoralConsultation, Patient, sequelize } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
+
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);
 
-  const doctoralConsultation = await DoctoralConsultation.findOne({
-    where: { uid },
-  });
+  try {
+    return await sequelize.transaction(async (t) => {
+      const doctoralConsultation = await DoctoralConsultation.findOne({
+        where: { uidDoctoralConsultation: uid },
+      }, { transaction: t, lock: true });
 
-  if (!doctoralConsultation) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Get Doctoral Consultation Detail',
-      status: 'error',
-      message: `Doctoral consultation with this uid not found! (target: ${uid})`,
+      if (!doctoralConsultation) {
+        throw new Error('This doctoral consultation target not found!');
+      }
+
+      const patient = await Patient.findOne({
+        where: { uidPatient: doctoralConsultation.uidPatient },
+        attributes: ['name', 'date_of_birth', 'sex'],
+      }, { transaction: t, lock: true });
+
+      if (!patient) {
+        throw new Error('Patient with this doctoral consultation target not found!');
+      }
+
+      await LogsCreator(User, uid, 'Get Doctoral Consultation Detail', 'success', 'Successfully get doctoral consultation target!');
+
+      return res.json({
+        status: 'success',
+        data: {
+          patient,
+          doctoralConsultation,
+        },
+      });
     });
+  } catch (error) {
+    await LogsCreator(User, uid, 'Get Doctoral Consultation Detail', 'error', error.message);
 
-    return res.status(404).json({
+    return res.status(409).json({
       status: 'error',
-      message: 'Doctoral consultation with this uid not found!',
+      message: error.message,
     });
   }
-
-  const patientIdentity = await PatientIdentity.findOne({
-    where: { uid: doctoralConsultation.uidPatient },
-    attributes: ['name', 'date_of_birth', 'sex'],
-  });
-
-  if (!patientIdentity) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Get Doctoral Consultation Detail',
-      status: 'error',
-      message: `Patient identity with this doctoral consultation uid patient not found! (target: ${doctoralConsultation.uidPatient})`,
-    });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Patient identity with this doctoral consultation uid patient not found!',
-    });
-  }
-
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Get Doctoral Consultation Detail',
-    status: 'success',
-    message: `Get doctoral consultation detail success! (target: ${uid})`,
-  });
-
-  return res.json({
-    status: 'success',
-    data: {
-      patientIdentity,
-      doctoralConsultation,
-    },
-  });
 };

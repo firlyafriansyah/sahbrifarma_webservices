@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
       }
 
       const loginStatus = await LoginStatus.findOne({
-        where: { uidAdministrationAccount: administrationAccount.uid },
+        where: { uidAdministrationAccount: administrationAccount.uidAdministrationAccount },
       }, { transaction: t, lock: true });
 
       if (!loginStatus) {

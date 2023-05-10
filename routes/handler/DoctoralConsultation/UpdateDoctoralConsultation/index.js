@@ -1,6 +1,6 @@
 const Validator = require('fastest-validator');
-const { DoctoralConsultation, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { DoctoralConsultation, sequelize } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 const v = new Validator();
 
@@ -27,54 +27,40 @@ module.exports = async (req, res) => {
     });
   }
 
-  const doctoralConsultation = await DoctoralConsultation.findOne({
-    where: { uid },
-  });
+  try {
+    return await sequelize.transaction(async (t) => {
+      const doctoralConsultation = await DoctoralConsultation.findOne({
+        where: { uidDoctoralConsultation: uid },
+      }, { transaction: t, lock: true });
 
-  if (!doctoralConsultation) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Update Doctoral Consultation',
-      status: 'error',
-      message: `Doctoral consultation with this uid not found! (target: ${uid})`,
+      if (!doctoralConsultation) {
+        throw new Error('This doctoral consultation target not found!');
+      }
+
+      const updateDoctoralConsultation = await doctoralConsultation.update({
+        allergies,
+        anamnesis,
+        diagnosis,
+        notes,
+      }, { transaction: t, lock: true });
+
+      if (!updateDoctoralConsultation) {
+        throw new Error('Failed update this doctoral consultation target!');
+      }
+
+      await LogsCreator(User, uid, ' Update Doctoral Cosultation', 'success', 'Successfully updated this doctoral consultation target!');
+
+      return res.json({
+        status: 'success',
+        data: updateDoctoralConsultation,
+      });
     });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Doctoral consultation with this uid not found!',
-    });
-  }
-
-  const updateDoctoralConsultation = await doctoralConsultation.update({
-    allergies,
-    anamnesis,
-    diagnosis,
-    notes,
-  });
-
-  if (!updateDoctoralConsultation) {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Update Doctoral Consultation',
-      status: 'error',
-      message: `Update doctoral consultation failed! (target: ${uid})`,
-    });
+  } catch (error) {
+    await LogsCreator(User, uid, ' Update Doctoral Cosultation', 'error', error.message);
 
     return res.status(409).json({
       status: 'error',
-      message: 'Update doctoral consultation failed!',
+      message: error.message,
     });
   }
-
-  await Logs.create({
-    administrationAccount: User || 'Guest',
-    action: 'Update Doctoral Consultation',
-    status: 'error',
-    message: `Update doctoral consultation success! (target: ${uid})`,
-  });
-
-  return res.json({
-    status: 'success',
-    data: updateDoctoralConsultation,
-  });
 };

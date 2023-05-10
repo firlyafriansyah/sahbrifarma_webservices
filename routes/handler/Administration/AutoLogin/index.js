@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const { AdministrationAccount, LoginStatus, sequelize } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
@@ -24,8 +25,13 @@ module.exports = async (req, res) => {
         throw new Error('This administration account not found!');
       }
 
-      if (Pass !== administrationAccount.password) {
-        throw new Error('Password not match with this administration account!');
+      const isValidPassword = await bcrypt.compare(
+        Pass,
+        administrationAccount.password,
+      );
+
+      if (!isValidPassword) {
+        throw new Error('Password not match with this administration account target!');
       }
 
       if (administrationAccount.status === 'inactive') {

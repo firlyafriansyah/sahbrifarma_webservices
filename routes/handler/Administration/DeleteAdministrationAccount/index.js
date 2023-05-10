@@ -16,6 +16,10 @@ module.exports = async (req, res) => {
         throw new Error('This administration account target not found!');
       }
 
+      if (administrationAccount.role === 'super-admin') {
+        throw new Error('Can\'t delete administration account with role super admin!');
+      }
+
       const loginStatus = await LoginStatus.findOne({
         where: { uidAdministrationAccount: administrationAccount.uidAdministrationAccount },
       }, { lock: true, transaction: t });

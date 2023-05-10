@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const Validator = require('fastest-validator');
 const { Decryptor, LogsCreator } = require('../../../../utils');
-const { AdministrationAccount, LoginStatus } = require('../../../../models');
+const { AdministrationAccount, LoginStatus, sequelize } = require('../../../../models');
 
 const v = new Validator();
 
@@ -23,45 +23,56 @@ module.exports = async (req, res) => {
     });
   }
 
-  const administrationAccount = await AdministrationAccount.findOne({
-    where: { username: req.body.username },
-  });
+  try {
+    return await sequelize.transaction(async (t) => {
+      const administrationAccount = await AdministrationAccount.findOne({
+        where: { username: req.body.username },
+      }, { transaction: t });
 
-  if (administrationAccount) {
-    await LogsCreator(User, null, 'Register Administration Account', 'error', 'This username already used by another administration account!');
+      if (administrationAccount) {
+        throw new Error('This username already used by another administration account!');
+      }
+
+      const password = await bcrypt.hash(req.body.password, 10);
+
+      const createAdministrationAccount = await AdministrationAccount.create({
+        username: req.body.username,
+        password,
+        role: req.body.role,
+        status: 'active',
+      }, { transaction: t });
+
+      if (!createAdministrationAccount) {
+        throw new Error('Failed registered this administration account!');
+      }
+
+      const createLoginStatus = await LoginStatus.create({
+        uidAdministrationAccount: createAdministrationAccount.uidAdministrationAccount,
+        loggedIn: false,
+      }, { transaction: t });
+
+      if (!createLoginStatus) {
+        throw new Error('Failed create login status for this administration account!');
+      }
+
+      await LogsCreator(User, null, 'Register Administration Account', 'success', 'Successfully registered this administration account!');
+
+      return res.json({
+        status: 'success',
+        data: {
+          username: createAdministrationAccount.username,
+          role: createAdministrationAccount.role,
+          loggedIn: createLoginStatus.loggedIn,
+          status: createLoginStatus.status,
+        },
+      });
+    });
+  } catch (error) {
+    await LogsCreator(User, null, 'Register Administration Account', 'error', error.message);
+
+    return res.status(409).json({
+      status: 'error',
+      message: error.message,
+    });
   }
-
-  const password = await bcrypt.hash(req.body.password, 10);
-
-  const createAdministrationAccount = await AdministrationAccount.create({
-    username: req.body.username,
-    password,
-    role: req.body.role,
-    status: 'active',
-  });
-
-  if (!createAdministrationAccount) {
-    await LogsCreator(User, null, 'Register Administration Account', 'error', 'Failed registered this administration account!');
-  }
-
-  const createLoginStatus = await LoginStatus.create({
-    uidAdministrationAccount: createAdministrationAccount.uid,
-    loggedIn: false,
-  });
-
-  if (!createLoginStatus) {
-    await LogsCreator(User, null, 'Register Administration Account', 'error', 'Failed create login status for this administration account!');
-  }
-
-  await LogsCreator(User, null, 'Register Administration Account', 'success', 'Successfully registered this administration account!');
-
-  return res.json({
-    status: 'success',
-    data: {
-      username: createAdministrationAccount.username,
-      role: createAdministrationAccount.role,
-      loggedIn: createLoginStatus.loggedIn,
-      status: createLoginStatus.status,
-    },
-  });
 };

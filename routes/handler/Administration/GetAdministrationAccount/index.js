@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
     return await sequelize.transaction(async (t) => {
       const administrationAccount = await AdministrationAccount.findOne({
         where: { uidAdministrationAccount: uid },
-        attributes: ['uid', 'username', 'role', 'status', ['updated_at', 'updatedAt']],
+        attributes: ['uidAdministrationAccount', 'username', 'role', 'status', ['updated_at', 'updatedAt']],
       }, { transaction: t, lock: true });
 
       if (!administrationAccount) {
@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
       return res.json({
         status: 'success',
         data: {
-          uid: administrationAccount.uid,
+          uidAdministrationAccount: administrationAccount.uidAdministrationAccount,
           username: administrationAccount.username,
           role: administrationAccount.role,
           status: administrationAccount.status,
