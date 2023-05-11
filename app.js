@@ -4,7 +4,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
 const administrationRouter = require('./routes/Administration');
-const patientIdentityRouter = require('./routes/PatientIdentity');
+const patientRouter = require('./routes/Patient');
 const serviceConnectionTestRouter = require('./routes/ServiceConnectionTest');
 const queueRouter = require('./routes/Queue');
 const medicalTestRouter = require('./routes/MedicalTest');
@@ -19,7 +19,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/administration', administrationRouter);
-app.use('/patient', patientIdentityRouter);
+app.use('/patient', patientRouter);
 app.use('/services-connection-test', serviceConnectionTestRouter);
 app.use('/queue', queueRouter);
 app.use('/medical-test', medicalTestRouter);

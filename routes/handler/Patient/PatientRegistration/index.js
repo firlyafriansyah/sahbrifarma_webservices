@@ -1,8 +1,6 @@
 const Validator = require('fastest-validator');
-const {
-  PatientIdentity, Logs, Queue,
-} = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { Patient, Queue } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 const v = new Validator();
 
@@ -30,8 +28,8 @@ module.exports = async (req, res) => {
   const DATE = new Date();
   const IDPasien = `${DATE.getFullYear()}${DATE.getMonth()}${DATE.getDate()}${DATE.getHours()}${DATE.getMinutes()}${DATE.getSeconds()}`;
 
-  const patientIdentityData = {
-    uid: IDPasien,
+  const patientData = {
+    uidPatient: IDPasien,
     name: req.body.nama_lengkap,
     address: req.body.alamat,
     phoneNumber: req.body.nomor_telepon,
@@ -45,34 +43,24 @@ module.exports = async (req, res) => {
     patientName: req.body.nama_lengkap,
   };
 
-  const patientIdentity = await PatientIdentity.create(patientIdentityData);
+  const patient = await Patient.create(patientData);
   const queue = await Queue.create(queueData);
 
   return Promise.all([
-    patientIdentity, queue,
+    patient, queue,
   ]).then(async () => {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Register Patient Identity',
-      status: 'success',
-      message: `Patient identity succesfully registered! (target: ${req.body.nama_lengkap})`,
-    });
+    await LogsCreator(User, null, 'Register Patient', 'success', 'Successfully registered this patient target!');
 
     return res.json({
       status: 'success',
-      message: 'Patient identity succesfully registered!',
+      message: 'Successfully register this patient target!',
     });
   }).catch(async () => {
-    await Logs.create({
-      administrationAccount: User || 'Guest',
-      action: 'Register Patient Identity',
-      status: 'error',
-      message: `Patient identity registered failed! (target: ${req.body.nama_lengkap})`,
-    });
+    await LogsCreator(User, null, 'Register Patient', 'error', 'Failed register this patient target!');
 
     return res.status(409).json({
       status: 'error',
-      message: 'Patient identity registered failed!',
+      message: 'Failed register this patient target!',
     });
   });
 };
