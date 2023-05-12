@@ -29,7 +29,10 @@ module.exports = async (req, res) => {
 
       return res.json({
         status: 'success',
-        medicalTestList,
+        data: {
+          patient,
+          medicalTestList,
+        },
       });
     });
   } catch (error) {

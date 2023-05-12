@@ -1,4 +1,6 @@
-const { PatientIdentity, DoctoralConsultation, sequelize } = require('../../../../models');
+const {
+  PatientIdentity, DoctoralConsultation, sequelize,
+} = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
