@@ -83,7 +83,7 @@ module.exports = async (req, res, next) => {
   }
 
   const loginStatus = await LoginStatus.findOne({
-    where: { uidAdministrationAccount: administrationAccount.uid },
+    where: { uidAdministrationAccount: administrationAccount.uidAdministrationAccount },
   });
 
   // CHECK LOGIN STATUS IS EXIST

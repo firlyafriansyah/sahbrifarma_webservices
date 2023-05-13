@@ -1,7 +1,10 @@
+const Validator = require('fastest-validator');
 const {
-  PatientIdentity, DoctoralConsultation, sequelize,
+  Patient, DoctoralConsultation, sequelize,
 } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
+
+const v = new Validator();
 
 module.exports = async (req, res) => {
   const { uidPatient } = req.params;
@@ -11,13 +14,29 @@ module.exports = async (req, res) => {
     allergies, anamnesis, diagnosis, notes,
   } = req.body;
 
+  const schema = {
+    allergies: 'string|optional',
+    anamnesis: 'string|empty:false',
+    diagnosis: 'string|empty:false',
+    notes: 'string|optional',
+  };
+
+  const validate = v.validate(req.body, schema);
+
+  if (validate.length) {
+    return res.status(401).json({
+      status: 'error',
+      validate,
+    });
+  }
+
   try {
     return await sequelize.transaction(async (t) => {
-      const patientIdentity = await PatientIdentity.findOne({
+      const patient = await Patient.findOne({
         where: { uidPatient },
       }, { transaction: t, lock: true });
 
-      if (!patientIdentity) {
+      if (!patient) {
         throw new Error('This patient target not found');
       }
 

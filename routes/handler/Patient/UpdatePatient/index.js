@@ -1,31 +1,11 @@
-const Validator = require('fastest-validator');
 const { Patient, sequelize } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
-
-const v = new Validator();
 
 module.exports = async (req, res) => {
   const { uidPatient } = req.params;
 
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);
-
-  const schema = {
-    nama_lengkap: 'string|empty:false',
-    alamat: 'string|empty:false',
-    nomor_telepon: 'string|empty:false',
-    nomor_telepon_darurat: 'string|empty:false',
-    tanggal_lahir: 'string|empty:false',
-    jenis_kelamin: { type: 'enum', values: ['Laki - Laki', 'Perempuan'] },
-  };
-
-  const validate = v.validate(req.body, schema);
-  if (validate.length) {
-    return res.status(403).json({
-      status: 'error',
-      message: validate,
-    });
-  }
 
   try {
     return await sequelize.transaction(async (t) => {
@@ -47,12 +27,12 @@ module.exports = async (req, res) => {
       };
 
       if (
-        req.body.nama_lengkap === patientData.name
-        && req.body.alamat === patientData.address
-        && req.body.nomor_telepon === patientData.phoneNumber
-        && req.body.nomor_telepon_darurat === patientData.emergencyPhoneNumber
-        && req.body.tanggal_lahir === patientData.dateOfBirth
-        && req.body.jenis_kelamin === patientData.sex
+        req.body.nama_lengkap === patient.name
+        && req.body.alamat === patient.address
+        && req.body.nomor_telepon === patient.phoneNumber
+        && req.body.nomor_telepon_darurat === patient.emergencyPhoneNumber
+        && req.body.tanggal_lahir === patient.dateOfBirth
+        && req.body.jenis_kelamin === patient.sex
       ) {
         return res.json({
           status: 'success',

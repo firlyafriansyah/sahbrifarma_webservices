@@ -1,5 +1,8 @@
+const Validator = require('fastest-validator');
 const { Patient, MedicalTest, sequelize } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
+
+const v = new Validator();
 
 module.exports = async (req, res) => {
   const { uidPatient } = req.params;
@@ -8,6 +11,25 @@ module.exports = async (req, res) => {
   const {
     bodyHeight, bodyWeight, bodyTemperature, bloodPressure, bloodSugar, uricAcid, cholesterol,
   } = req.body;
+
+  const schema = {
+    bodyHeight: 'number|optional',
+    bodyWeight: 'number|optional',
+    bodyTemperature: 'number|optional',
+    bloodPressure: 'string|optional',
+    bloodSugar: 'number|optional',
+    uricAcid: 'number|optional',
+    cholesterol: 'number|optional',
+  };
+
+  const validate = v.validate(req.body, schema);
+
+  if (validate.length) {
+    return res.status(401).json({
+      status: 'error',
+      validate,
+    });
+  }
 
   try {
     return await sequelize.transaction(async (t) => {

@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const Validator = require('fastest-validator');
+const CryptoJS = require('crypto-js');
 const { AdministrationAccount, LoginStatus, sequelize } = require('../../../../models');
 const { LogsCreator } = require('../../../../utils');
 
@@ -63,6 +64,9 @@ module.exports = async (req, res) => {
         throw new Error('Failed updated login status for this administration account target!');
       }
 
+      const authentication = CryptoJS.AES.encrypt(`${administrationAccount.uidAdministrationAccount}?${req.body.password}`, process.env.PASSPHRASE).toString();
+      const authorization = CryptoJS.AES.encrypt(`${administrationAccount.uidAdministrationAccount}`, process.env.PASSPHRASE).toString();
+
       await LogsCreator(null, administrationAccount.uidAdministrationAccount, 'Administration Account Login', 'success', 'This administration account target successfully logged in!');
 
       return res.json({
@@ -70,6 +74,8 @@ module.exports = async (req, res) => {
         data: {
           username: administrationAccount.username,
           role: administrationAccount.role,
+          authentication,
+          authorization,
         },
       });
     });

@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
   const { User } = Decryptor(authorization);
 
   const patientList = await Patient.findAll({
-    attributes: ['uid', 'name', 'dateOfBirth', 'sex'],
+    attributes: ['uidPatient', 'name', 'dateOfBirth', 'sex'],
   });
 
   if (!patientList || patientList.length <= 0) {

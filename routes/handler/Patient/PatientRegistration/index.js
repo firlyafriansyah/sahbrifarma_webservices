@@ -1,5 +1,5 @@
 const Validator = require('fastest-validator');
-const { Patient, Queue } = require('../../../../models');
+const { Patient, Queue, sequelize } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
 const v = new Validator();
@@ -43,24 +43,38 @@ module.exports = async (req, res) => {
     patientName: req.body.nama_lengkap,
   };
 
-  const patient = await Patient.create(patientData);
-  const queue = await Queue.create(queueData);
+  try {
+    return await sequelize.transaction(async (t) => {
+      const checkExistingPatient = await Patient.findOne({
+        where: { name: req.body.nama_lengkap, dateOfBirth: req.body.tanggal_lahir },
+      }, { transaction: t, lock: true });
 
-  return Promise.all([
-    patient, queue,
-  ]).then(async () => {
-    await LogsCreator(User, null, 'Register Patient', 'success', 'Successfully registered this patient target!');
+      if (checkExistingPatient) {
+        throw new Error('This patient target maybe already registered!');
+      }
 
-    return res.json({
-      status: 'success',
-      message: 'Successfully register this patient target!',
+      const patient = await Patient.create(patientData, { transaction: t, lock: true });
+      const queue = await Queue.create(queueData, { transaction: t, lock: true });
+
+      return Promise.all([
+        patient, queue,
+      ]).then(async () => {
+        await LogsCreator(User, null, 'Register Patient', 'success', 'Successfully registered this patient target!');
+
+        return res.json({
+          status: 'success',
+          message: 'Successfully register this patient target!',
+        });
+      }).catch(async () => {
+        throw new Error('Failed register this patient target!');
+      });
     });
-  }).catch(async () => {
-    await LogsCreator(User, null, 'Register Patient', 'error', 'Failed register this patient target!');
+  } catch (error) {
+    await LogsCreator(User, null, 'Register Patient', 'error', error.message);
 
     return res.status(409).json({
       status: 'error',
-      message: 'Failed register this patient target!',
+      message: error.message,
     });
-  });
+  }
 };

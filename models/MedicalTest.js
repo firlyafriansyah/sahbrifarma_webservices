@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.FLOAT,
     },
     bodyTemperature: {
-      field: 'body_parameter',
+      field: 'body_temperature',
       type: DataTypes.FLOAT,
     },
     bloodPressure: {

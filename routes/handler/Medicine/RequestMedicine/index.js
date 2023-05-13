@@ -1,4 +1,5 @@
 const Validator = require('fastest-validator');
+const { Op } = require('sequelize');
 const { sequelize, Patient, Medicine } = require('../../../../models');
 const { LogsCreator, Decryptor } = require('../../../../utils');
 
@@ -36,6 +37,14 @@ module.exports = async (req, res) => {
 
       if (!patient) {
         throw new Error('This patient target not found!');
+      }
+
+      const checkMedicineRequest = await Medicine.findOne({
+        where: { [Op.and]: [{ uidPatient }, { [Op.or]: [{ status: 'requested' }, { status: 'prepared' }] }] },
+      });
+
+      if (checkMedicineRequest) {
+        throw new Error('This patient target already have requested medicine!');
       }
 
       const requestedMedicine = await Medicine.create({

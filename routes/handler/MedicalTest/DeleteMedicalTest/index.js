@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
   try {
     return await sequelize.transaction(async (t) => {
       const medicalTest = await MedicalTest.findOne({
-        where: { uid },
+        where: { uidMedicalTest: uid },
       }, { transaction: t, lock: true });
 
       if (!medicalTest) {

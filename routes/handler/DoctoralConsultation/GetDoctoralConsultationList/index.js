@@ -9,11 +9,11 @@ module.exports = async (req, res) => {
 
   try {
     return await sequelize.transaction(async (t) => {
-      const patientIdentity = await Patient.findOne({
+      const patient = await Patient.findOne({
         where: { uidPatient },
       }, { transaction: t, lock: true });
 
-      if (!patientIdentity) {
+      if (!patient) {
         throw new Error('This patient target not found!');
       }
 
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
       return res.json({
         status: 'success',
         data: {
-          patientIdentity,
+          patient,
           doctoralConsultationList,
         },
       });

@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
         attributes: ['uidPatient', 'patientName', 'status', ['updated_at', 'lastUpdate']],
       }, { transaction: t, lock: true });
 
-      if (!getQueueList) {
+      if (!getQueueList || getQueueList.length <= 0) {
         throw new Error('This queue list target not found!');
       }
 

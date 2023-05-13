@@ -1,8 +1,5 @@
-const Validator = require('fastest-validator');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 const { sequelize, Medicine } = require('../../../../models');
-
-const v = new Validator();
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
@@ -12,22 +9,6 @@ module.exports = async (req, res) => {
   const {
     medicine, preparation, dosage, rules,
   } = req.body;
-
-  const schema = {
-    medicine: 'string|empty:false',
-    preparation: 'string|empty:false',
-    dosage: 'string|empty:false',
-    rules: 'string|empty:false',
-  };
-
-  const validate = v.validate(req.body, schema);
-
-  if (validate.length) {
-    return res.status(403).json({
-      status: 'error',
-      message: validate,
-    });
-  }
 
   try {
     return await sequelize.transaction(async (t) => {
@@ -39,7 +20,7 @@ module.exports = async (req, res) => {
         throw new Error('This medicine target not found!');
       }
 
-      const updateMedicine = await medicine.update({
+      const updateMedicine = await medicineTarget.update({
         medicine,
         preparation,
         dosage,
@@ -55,7 +36,7 @@ module.exports = async (req, res) => {
 
       return res.json({
         status: 'success',
-        data: medicine,
+        updateMedicine,
       });
     });
   } catch (error) {

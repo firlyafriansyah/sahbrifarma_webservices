@@ -1,8 +1,5 @@
-const Validator = require('fastest-validator');
 const { DoctoralConsultation, sequelize } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
-
-const v = new Validator();
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
@@ -11,21 +8,6 @@ module.exports = async (req, res) => {
   const {
     allergies, anamnesis, diagnosis, notes,
   } = req.body;
-
-  const schema = {
-    allergies: 'string|empty:false',
-    anamnesis: 'string|empty:false',
-    diagnosis: 'string|empty:false',
-    notes: 'string|empty:false',
-  };
-
-  const validate = v.validate(req.body, schema);
-  if (validate.length) {
-    return res.status(403).json({
-      status: 'error',
-      message: validate,
-    });
-  }
 
   try {
     return await sequelize.transaction(async (t) => {

@@ -1,5 +1,5 @@
 const {
-  Patient, Allergies, Anamnesis, Diagnosis, MedicalTest, Medicine, Queue, sequelize,
+  Patient, MedicalTest, Medicine, Queue, DoctoralConsultation, sequelize,
 } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
@@ -19,15 +19,7 @@ module.exports = async (req, res) => {
         throw new Error('This patient target not found!');
       }
 
-      const allergies = await Allergies.findOne({
-        where: { uidPatient },
-      }, { transaction: t, lock: true });
-
-      const anamnesis = await Anamnesis.findOne({
-        where: { uidPatient },
-      }, { transaction: t, lock: true });
-
-      const diagnosis = await Diagnosis.findOne({
+      const doctoralConsultation = await DoctoralConsultation.findOne({
         where: { uidPatient },
       }, { transaction: t, lock: true });
 
@@ -43,20 +35,8 @@ module.exports = async (req, res) => {
         where: { uidPatient },
       }, { transaction: t, lock: true });
 
-      if (allergies) {
-        await Allergies.destroy({
-          where: { uidPatient },
-        }, { transaction: t, lock: true });
-      }
-
-      if (anamnesis) {
-        await Anamnesis.destroy({
-          where: { uidPatient },
-        }, { transaction: t, lock: true });
-      }
-
-      if (diagnosis) {
-        await Diagnosis.destroy({
+      if (doctoralConsultation) {
+        await DoctoralConsultation.destroy({
           where: { uidPatient },
         }, { transaction: t, lock: true });
       }

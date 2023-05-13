@@ -1,4 +1,4 @@
-const { DocotoralConsultation, sequelize } = require('../../../../models');
+const { DoctoralConsultation, sequelize } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
 
   try {
     return await sequelize.transaction(async (t) => {
-      const docotoralConsultation = await DocotoralConsultation.findOne({
+      const docotoralConsultation = await DoctoralConsultation.findOne({
         where: { uidDoctoralConsultation: uid },
       }, { transaction: t, lock: true });
 

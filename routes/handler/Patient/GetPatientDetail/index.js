@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
 
   const patient = await Patient.findOne({
     where: { uidPatient },
-    attributes: ['uid', 'name', 'address', 'phoneNumber', 'emergencyPhoneNumber', 'dateOfBirth', 'sex', ['updated_at', 'lastUpdated']],
+    attributes: ['uidPatient', 'name', 'address', 'phoneNumber', 'emergencyPhoneNumber', 'dateOfBirth', 'sex', ['updated_at', 'lastUpdated']],
   });
 
   if (!patient) {
