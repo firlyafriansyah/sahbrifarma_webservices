@@ -20,6 +20,19 @@ module.exports = (sequelize, DataTypes) => {
       values: ['super-admin', 'frontdesk', 'nurse', 'doctor', 'pharmacist'],
       allowNull: false,
     },
+    fullname: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
+    date_of_birth: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    sex: {
+      type: DataTypes.ENUM,
+      values: ['Laki - Laki', 'Perempuan'],
+      allowNull: false,
+    },
     status: {
       type: DataTypes.ENUM,
       values: ['active', 'inactive'],

@@ -13,6 +13,9 @@ module.exports = async (req, res) => {
     username: 'string|empty:false',
     password: 'string|min:6',
     role: { type: 'enum', values: ['frontdesk', 'nurse', 'doctor', 'pharmacist'] },
+    fullname: 'string|empty:false',
+    dateOfBirth: 'string|empty:false',
+    sex: { type: 'enum', values: ['Laki - Laki', 'Perempuan'] },
   };
 
   const validate = v.validate(req.body, schema);

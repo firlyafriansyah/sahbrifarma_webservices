@@ -74,8 +74,7 @@ module.exports = async (req, res) => {
         data: {
           username: administrationAccount.username,
           role: administrationAccount.role,
-          authentication,
-          authorization,
+          token: `${authentication}~${authorization}`,
         },
       });
     });

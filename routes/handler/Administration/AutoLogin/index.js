@@ -66,10 +66,7 @@ module.exports = async (req, res) => {
 
       return res.json({
         status: 'success',
-        data: {
-          username: administrationAccount.username,
-          role: administrationAccount.role,
-        },
+        message: 'This administration account successfully login with auto login!',
       });
     });
   } catch (error) {

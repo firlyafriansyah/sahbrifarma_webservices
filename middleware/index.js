@@ -3,6 +3,7 @@ const FrontdeskAuthorization = require('./FrontdeskAuthorization');
 const NurseAuthorization = require('./NurseAuthorization');
 const PharmacistAuthorization = require('./PharmacistAuthorization');
 const SuperAuthorization = require('./SuperAuthorization');
+const SelfAuthorization = require('./SelfAuthorization');
 const Logout = require('./Logout');
 const Queue = require('./Queue');
 
@@ -12,6 +13,7 @@ module.exports = {
   NurseAuthorization,
   PharmacistAuthorization,
   SuperAuthorization,
+  SelfAuthorization,
   Logout,
   Queue,
 };

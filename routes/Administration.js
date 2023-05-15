@@ -10,7 +10,7 @@ router.post('/autologin', administrationHandler.AutoLogin);
 router.post('/register', middleware.SuperAuthorization, administrationHandler.Register);
 router.post('/logout/:uid', middleware.Logout, administrationHandler.Logout);
 router.get('/', middleware.SuperAuthorization, administrationHandler.GetAdministrationAccountList);
-router.get('/detail/:uid', middleware.SuperAuthorization, administrationHandler.GetAdministrationAccount);
+router.get('/detail/:uid', middleware.SelfAuthorization, administrationHandler.GetAdministrationAccount);
 router.put('/update/:uid', middleware.SuperAuthorization, administrationHandler.UpdateAdministrationAccount);
 router.put('/disabled/:uid', middleware.SuperAuthorization, administrationHandler.DisabledAdministrationAccount);
 router.put('/activated/:uid', middleware.SuperAuthorization, administrationHandler.ActivatedAdministrationAccount);

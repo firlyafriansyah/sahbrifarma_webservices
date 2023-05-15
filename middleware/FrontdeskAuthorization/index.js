@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
 
   // CHECK REQUEST HEADERS
   if (!authorization) {
-    await LogsCreator(null, null, 'Frontdesk Middlerware', 'error', 'Authorization not found!');
+    await LogsCreator(null, null, 'Frontdesk Middleware', 'error', 'Authorization not found!');
 
     return res.status(401).json({
       status: 'error',
@@ -21,7 +21,7 @@ module.exports = async (req, res, next) => {
 
   // CHECK ADMINISTRATION ACCOUNT IS EXIST
   if (!administrationAccount) {
-    await LogsCreator(User, null, 'Frontdesk Middlerware', 'error', 'This administration account not found!');
+    await LogsCreator(User, null, 'Frontdesk Middleware', 'error', 'This administration account not found!');
 
     return res.status(404).json({
       status: 'error',
@@ -31,7 +31,7 @@ module.exports = async (req, res, next) => {
 
   // CHECK ADMINISTRATION ACCOUNT HAVE THIS PERMISSION
   if (administrationAccount.role !== 'frontdesk' && administrationAccount.role !== 'super-admin') {
-    await LogsCreator(User, null, 'Frontdesk Middlerware', 'error', 'This administration account doesn\'t have authorization for this endpoint!');
+    await LogsCreator(User, null, 'Frontdesk Middleware', 'error', 'This administration account doesn\'t have authorization for this endpoint!');
 
     return res.status(401).json({
       status: 'error',
@@ -45,7 +45,7 @@ module.exports = async (req, res, next) => {
 
   // CHECK LOGIN STATUS IS EXIST
   if (!loginStatus) {
-    await LogsCreator(User, null, 'Frontdesk Middlerware', 'error', 'This administration doesn\'t have login status!');
+    await LogsCreator(User, null, 'Frontdesk Middleware', 'error', 'This administration doesn\'t have login status!');
 
     return res.status(404).json({
       status: 'error',
@@ -55,7 +55,7 @@ module.exports = async (req, res, next) => {
 
   // CHECK LOGIN STATUS IS ACTIVE
   if (administrationAccount.status === 'inactive') {
-    await LogsCreator(User, null, 'Frontdesk Middlerware', 'error', 'This administration account status is inactive!');
+    await LogsCreator(User, null, 'Frontdesk Middleware', 'error', 'This administration account status is inactive!');
 
     return res.status(409).json({
       status: 'error',
@@ -65,7 +65,7 @@ module.exports = async (req, res, next) => {
 
   // CHECK LOGIN STATUS IS LOGGED IN
   if (!loginStatus.loggedIn) {
-    await LogsCreator(User, null, 'Frontdesk Middlerware', 'error', 'This administration account isn\'t currently logged in on any device!');
+    await LogsCreator(User, null, 'Frontdesk Middleware', 'error', 'This administration account isn\'t currently logged in on any device!');
 
     return res.status(409).json({
       status: 'error',
@@ -75,7 +75,7 @@ module.exports = async (req, res, next) => {
 
   // CHECK ADMINISTRATION ACCOUNT NOT UPDATED LATELY
   if (loginStatus.lastUpdate.toString() !== administrationAccount.updatedAt.toString()) {
-    await LogsCreator(User, null, 'Frontdesk Middlerware', 'error', 'This administration account recently updated, please re-login!');
+    await LogsCreator(User, null, 'Frontdesk Middleware', 'error', 'This administration account recently updated, please re-login!');
 
     return res.status(409).json({
       status: 'error',
