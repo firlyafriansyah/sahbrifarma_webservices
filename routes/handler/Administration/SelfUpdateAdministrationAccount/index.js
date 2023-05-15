@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const Validator = require('fastest-validator');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 const { AdministrationAccount, sequelize, LoginStatus } = require('../../../../models');
@@ -11,9 +10,6 @@ module.exports = async (req, res) => {
   const { User } = Decryptor(authorization);
 
   const schema = {
-    username: 'string|empty:false',
-    password: 'string|min:6',
-    role: { type: 'enum', values: ['frontdesk', 'nurse', 'doctor', 'pharmacist'] },
     fullname: 'string|empty:false',
     dateOfBirth: 'string|empty:false',
     sex: { type: 'enum', values: ['Laki - Laki', 'Perempuan'] },
@@ -42,27 +38,15 @@ module.exports = async (req, res) => {
         throw new Error('Can\'t change any information on administration account with role super admin!');
       }
 
-      const checkName = await AdministrationAccount.findOne({
-        where: { username: req.body.username },
-      }, { transaction: t, lock: true });
-
-      if (checkName && checkName.username !== administrationAccount.username) {
-        throw new Error('This username already used by another administration account!');
-      }
-
-      const password = await bcrypt.hash(req.body.password, 10);
-
-      if (
-        req.body.fullname === administrationAccount.fullname
-        && req.body.sex === administrationAccount.sex
-        && req.body.dateOfBirth === administrationAccount.date_of_birth
-        && req.body.username === administrationAccount.username
-        && req.body.role === administrationAccount.role
-        && await bcrypt.compare(req.body.password, administrationAccount.password)
+      if (administrationAccount.fullname === req.body.fullname
+          && administrationAccount.date_of_birth === req.body.dateOfBirth
+          && administrationAccount.sex === req.body.sex
       ) {
+        await LogsCreator(User, uid, 'Self Update Administration Account', 'success', 'You doesn\'t change anything!');
+
         return res.json({
           status: 'success',
-          message: 'Administration account data same with existing data!',
+          message: 'You doesn\'t change anything!',
         });
       }
 
@@ -75,12 +59,12 @@ module.exports = async (req, res) => {
       }
 
       const updateAdministrationAccount = await administrationAccount.update({
+        username: administrationAccount.username,
+        password: administrationAccount.password,
+        role: administrationAccount.role,
         fullname: req.body.fullname,
-        dateOfBirth: req.body.dateOfBirth,
+        date_of_birth: req.body.dateOfBirth,
         sex: req.body.sex,
-        password,
-        username: req.body.username,
-        role: req.body.role,
         status: administrationAccount.status,
       }, { transaction: t, lock: true });
 
@@ -89,25 +73,23 @@ module.exports = async (req, res) => {
       }
 
       const updateLoginStatus = await loginStatus.update({
-        loggedIn: 0,
+        lastUpdate: administrationAccount.updatedAt,
+        loggedIn: true,
       }, { transaction: t, lock: true });
 
       if (!updateLoginStatus) {
-        throw new Error('Failed updated this administration account target login status!');
+        throw new Error('Failed updated login status for this administration account target!');
       }
 
-      await LogsCreator(User, uid, 'Update Administration Account', 'success', 'This administration account target successfully updated!');
+      await LogsCreator(User, uid, 'Self Update Administration Account', 'success', 'This administration account target successfully updated!');
 
       return res.json({
         status: 'success',
-        data: {
-          username: updateAdministrationAccount.username,
-          role: updateAdministrationAccount.role,
-        },
+        updateAdministrationAccount,
       });
     });
   } catch (error) {
-    await LogsCreator(User, uid, 'Update Administration Account', 'error', error.message);
+    await LogsCreator(User, uid, 'Self Update Administration Account', 'error', error.message);
 
     return res.json({
       status: 'success',

@@ -96,6 +96,16 @@ module.exports = async (req, res, next) => {
     });
   }
 
+  // CHECK ADMINISTRATION ACCOUNT NOT UPDATED LATELY
+  if (loginStatus.lastUpdate.toString() !== administrationAccount.updatedAt.toString()) {
+    await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account recently updated, please re-login!');
+
+    return res.status(409).json({
+      status: 'error',
+      message: 'This administration account recently updated, please re-login!',
+    });
+  }
+
   // CHECK LOGIN STATUS IS ACTIVE
   if (administrationAccount.status === 'inactive') {
     await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account status is inactive!');
@@ -113,16 +123,6 @@ module.exports = async (req, res, next) => {
     return res.status(409).json({
       status: 'error',
       message: 'This administration account isn\'t currently logged in on any device!',
-    });
-  }
-
-  // CHECK ADMINISTRATION ACCOUNT NOT UPDATED LATELY
-  if (loginStatus.lastUpdate.toString() !== administrationAccount.updatedAt.toString()) {
-    await LogsCreator(User, null, 'Queue Middleware', 'error', 'This administration account recently updated, please re-login!');
-
-    return res.status(409).json({
-      status: 'error',
-      message: 'This administration account recently updated, please re-login!',
     });
   }
 
