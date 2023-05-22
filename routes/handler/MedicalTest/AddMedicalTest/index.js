@@ -1,5 +1,7 @@
 const Validator = require('fastest-validator');
-const { Patient, MedicalTest, sequelize } = require('../../../../models');
+const {
+  Patient, MedicalTest, Queue, sequelize,
+} = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
 const v = new Validator();
@@ -41,6 +43,14 @@ module.exports = async (req, res) => {
         throw new Error('This patient target not found!');
       }
 
+      const queue = await Queue.findOne({
+        where: { uidPatient },
+      }, { transaction: t, lock: true });
+
+      if (!queue) {
+        throw new Error('Queue for this patient target not found!');
+      }
+
       const createMedicalTest = await MedicalTest.create({
         uidPatient,
         bodyHeight,
@@ -56,11 +66,19 @@ module.exports = async (req, res) => {
         throw new Error('Failed create medical test for this patient target!');
       }
 
+      const updateQueue = queue.update({
+        status: 'in_doctoral_consultation_queue',
+      });
+
+      if (!updateQueue) {
+        throw new Error('Failed udpate queue for this patient target!');
+      }
+
       await LogsCreator(User, uidPatient, 'Create Medical Test', 'success', 'Successfully created medical test for this patient target!');
 
       return res.json({
         status: 'success',
-        data: createMedicalTest,
+        message: 'Successfully created medical test for this patient target!',
       });
     });
   } catch (error) {

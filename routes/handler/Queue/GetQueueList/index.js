@@ -33,7 +33,8 @@ module.exports = async (req, res) => {
 
       const getQueueList = await Queue.findAll({
         where: whereStatement,
-        attributes: ['uidPatient', 'patientName', 'status', ['updated_at', 'lastUpdate']],
+        attributes: ['uidPatient', 'patientName', 'status', 'sex', ['updated_at', 'lastUpdate']],
+        order: [['updated_at', 'ASC']],
       }, { transaction: t, lock: true });
 
       if (!getQueueList || getQueueList.length <= 0) {

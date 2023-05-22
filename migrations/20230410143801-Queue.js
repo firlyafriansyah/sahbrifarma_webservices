@@ -21,6 +21,11 @@ module.exports = {
         allowNull: false,
         defaultValue: 'out_of_queue',
       },
+      sex: {
+        type: Sequelize.ENUM,
+        values: ['Laki - Laki', 'Perempuan'],
+        allowNull: false,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,

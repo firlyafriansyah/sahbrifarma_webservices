@@ -1,11 +1,32 @@
+const Validator = require('fastest-validator');
 const { Patient, sequelize } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
+
+const v = new Validator();
 
 module.exports = async (req, res) => {
   const { uidPatient } = req.params;
 
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);
+
+  const schema = {
+    nama_lengkap: 'string|empty:false',
+    alamat: 'string|empty:false',
+    nomor_telepon: 'string|optional',
+    nomor_telepon_darurat: 'string|optional',
+    tanggal_lahir: 'string|empty:false',
+    jenis_kelamin: { type: 'enum', values: ['Laki - Laki', 'Perempuan'] },
+  };
+
+  const validate = v.validate(req.body, schema);
+
+  if (validate.length) {
+    return res.status(409).json({
+      status: 'error',
+      message: validate,
+    });
+  }
 
   try {
     return await sequelize.transaction(async (t) => {

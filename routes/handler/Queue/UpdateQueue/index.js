@@ -29,11 +29,11 @@ module.exports = async (req, res) => {
         throw new Error('Failed update this patient queue target!');
       }
 
-      await LogsCreator(User, uid, 'Update Patient Queue', 'success', 'Successfully updated this patient queueu target!');
+      await LogsCreator(User, uid, 'Update Patient Queue', 'success', 'Successfully updated this patient queue target!');
 
       return res.json({
         status: 'success',
-        data: updateQueue,
+        message: 'Successfully updated this patient queue target!',
       });
     });
   } catch (error) {

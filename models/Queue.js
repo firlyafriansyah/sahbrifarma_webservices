@@ -23,6 +23,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'out_of_queue',
     },
+    sex: {
+      type: DataTypes.ENUM,
+      values: ['Laki - Laki', 'Perempuan'],
+      allowNull: false,
+    },
     createdAt: {
       field: 'created_at',
       type: DataTypes.DATE,
