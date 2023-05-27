@@ -1,4 +1,6 @@
-const { DoctoralConsultation, Patient, sequelize } = require('../../../../models');
+const {
+  DoctoralConsultation, Patient, Medicine, sequelize,
+} = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
@@ -25,6 +27,10 @@ module.exports = async (req, res) => {
         throw new Error('Doctoral consultation list for this patient target not found!');
       }
 
+      const medicineList = await Medicine.findAll({
+        where: { uidPatient },
+      }, { transaction: t, lock: true });
+
       await LogsCreator(User, uidPatient, 'Get Doctoral Consultation List', 'success', 'Successfully get doctoral consultation list for this patient target!');
 
       return res.json({
@@ -32,6 +38,7 @@ module.exports = async (req, res) => {
         data: {
           patient,
           doctoralConsultationList,
+          medicineList,
         },
       });
     });
