@@ -1,11 +1,6 @@
 require('dotenv').config();
 
-const {
-  DB_HOST,
-  DB_PASSWORD,
-  DB_USERNAME,
-  DB_NAME,
-} = process.env;
+const {DB_USERNAME, DB_PASSWORD, DB_NAME, DB_HOST} = process.env;
 
 module.exports = {
   development: {
@@ -13,7 +8,7 @@ module.exports = {
     password: DB_PASSWORD,
     database: DB_NAME,
     host: DB_HOST,
-    dialect: 'mariadb',
+    dialect: 'mysql',
     dialectOptions: {
       useUTC: false,
     },
@@ -24,7 +19,7 @@ module.exports = {
     password: DB_PASSWORD,
     database: DB_NAME,
     host: DB_HOST,
-    dialect: 'mariadb',
+    dialect: 'mysql',
     dialectOptions: {
       useUTC: false,
     },
@@ -35,7 +30,7 @@ module.exports = {
     password: DB_PASSWORD,
     database: DB_NAME,
     host: DB_HOST,
-    dialect: 'mariadb',
+    dialect: 'mysql',
     dialectOptions: {
       useUTC: false,
     },
