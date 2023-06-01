@@ -6,4 +6,5 @@ const CryptoJS = require('crypto-js');
 // Authentication
 const text = CryptoJS.AES.encrypt('5?dinda123', '_f1rly_').toString();
 
+// eslint-disable-next-line no-console
 console.log(text);
