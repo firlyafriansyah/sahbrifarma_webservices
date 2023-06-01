@@ -28,11 +28,10 @@ app.use('/doctoral-consultation', doctoralConsultationRouter);
 app.use('/medicine', medicineRouter);
 
 // #THIS FOR HEROKU PRODUCTION CONFIGURATION
-// app.listen(process.env.PORT || 3000, () => {
-//   // eslint-disable-next-line no-console
-//   console.log('Express server listening on port %d in %s mode',
-//   this.address().port, app.settings.env);
-// });
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+  console.log('Express server listening on port', port)
+});
 
 // #THIS FOR LOCAL DEVELOPMENT
-module.exports = app;
+// module.exports = app;
