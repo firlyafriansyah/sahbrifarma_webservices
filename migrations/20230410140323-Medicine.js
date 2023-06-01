@@ -1,27 +1,36 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('medicine', {
-      uid: {
+      uid_medicine: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
       uid_patient: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(14),
         allowNull: false,
       },
       medicine: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
+        allowNull: false,
       },
-      preparations: {
-        type: Sequelize.STRING,
+      preparation: {
+        type: Sequelize.STRING(50),
+        allowNull: false,
       },
       dosage: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
+        allowNull: false,
       },
       rules: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(50),
+        allowNull: false,
+      },
+      status: {
+        type: Sequelize.ENUM,
+        values: ['requested', 'prepared', 'finished', 'canceled'],
+        allowNull: false,
       },
       created_at: {
         type: Sequelize.DATE,

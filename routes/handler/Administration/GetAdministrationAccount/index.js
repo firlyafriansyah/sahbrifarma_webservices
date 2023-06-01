@@ -1,37 +1,45 @@
-const { AdministrationAccount, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { AdministrationAccount, LoginStatus, sequelize } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
 
-  const administrationAccount = await AdministrationAccount.findOne({
-    where: { uid },
-    attributes: ['username', 'role', ['updated_at', 'updatedAt'], ['last_update', 'lastUpdate']],
-  });
+  const { authorization } = req.headers;
+  const { User } = Decryptor(authorization);
 
-  if (!administrationAccount) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Get Administration Account',
-      status: 'error',
-      message: `Administration account not found! (target: ${uid})`,
+  try {
+    return await sequelize.transaction(async (t) => {
+      const administrationAccount = await AdministrationAccount.findOne({
+        where: { uidAdministrationAccount: uid },
+        attributes: { exclude: ['password'] },
+      }, { transaction: t, lock: true });
+
+      if (!administrationAccount) {
+        throw new Error('This administration account target not found!');
+      }
+
+      const loginStatus = await LoginStatus.findOne({
+        where: { uidAdministrationAccount: administrationAccount.uidAdministrationAccount },
+        attributes: [['logged_in', 'loggedIn']],
+      }, { transaction: t, lock: true });
+
+      if (!loginStatus) {
+        throw new Error('This administration account target doesn\'t have login status!');
+      }
+
+      await LogsCreator(User, uid, 'Get Administration Account', 'success', 'Successfully get this adminstration account target detail!');
+
+      return res.json({
+        status: 'success',
+        administrationAccount,
+      });
     });
+  } catch (error) {
+    await LogsCreator(User, uid, 'Get Administration Account', 'success', error.message);
 
-    return res.status(404).json({
+    return res.status(409).json({
       status: 'error',
-      message: 'Administration account not found!',
+      message: error.message,
     });
   }
-
-  await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-    action: 'Get Administration Account',
-    status: 'success',
-    message: `Get administration account success! (target: ${uid})`,
-  });
-
-  return res.json({
-    status: 'success',
-    data: administrationAccount,
-  });
 };

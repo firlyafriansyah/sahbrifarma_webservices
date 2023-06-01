@@ -6,9 +6,13 @@ module.exports = {
       username: 'super-admin',
       password: await bcrypt.hash('superadmin123', 10),
       role: 'super-admin',
-      logged_in: true,
       status: 'active',
-      last_update: new Date(),
+      created_at: new Date(),
+      updated_at: new Date(),
+    }]);
+    await queryInterface.bulkInsert('login_status', [{
+      uid_administration_account: 1,
+      logged_in: false,
       created_at: new Date(),
       updated_at: new Date(),
     }]);

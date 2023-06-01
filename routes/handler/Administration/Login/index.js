@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
 const Validator = require('fastest-validator');
-const { AdministrationAccount, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const CryptoJS = require('crypto-js');
+const { AdministrationAccount, LoginStatus, sequelize } = require('../../../../models');
+const { LogsCreator } = require('../../../../utils');
 
 const v = new Validator();
 
@@ -13,108 +14,76 @@ module.exports = async (req, res) => {
 
   const validate = v.validate(req.body, schema);
   if (validate.length) {
-    return res.status(400).json({
+    return res.status(409).json({
       status: 'error',
       message: validate,
     });
   }
 
-  const administrationAccount = await AdministrationAccount.findOne({
-    where: { username: req.body.username },
-  });
+  try {
+    return await sequelize.transaction(async (t) => {
+      const administrationAccount = await AdministrationAccount.findOne({
+        where: { username: req.body.username },
+      }, { transaction: t, lock: true });
 
-  if (!administrationAccount) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Login',
-      status: 'error',
-      message: `Administration account not found! (target: ${req.body.username})`,
+      if (!administrationAccount) {
+        throw new Error('This administration account target not found!');
+      }
+
+      const isValidPassword = await bcrypt.compare(
+        req.body.password,
+        administrationAccount.password,
+      );
+
+      if (!isValidPassword) {
+        throw new Error('Password not match with this administration account target!');
+      }
+
+      if (administrationAccount.status === 'inactive') {
+        throw new Error('This administration account target status is inactive!');
+      }
+
+      const loginStatus = await LoginStatus.findOne({
+        where: { uidAdministrationAccount: administrationAccount.uidAdministrationAccount },
+      }, { transaction: t, lock: true });
+
+      if (!loginStatus) {
+        throw new Error('This administration account target does\'t have login status!');
+      }
+
+      if (loginStatus.loggedIn) {
+        throw new Error('This administration account target is already logged in on another device!');
+      }
+
+      const updateLoginStatus = await loginStatus.update({
+        lastUpdate: administrationAccount.updatedAt,
+        loggedIn: true,
+      }, { transaction: t, lock: true });
+
+      if (!updateLoginStatus) {
+        throw new Error('Failed updated login status for this administration account target!');
+      }
+
+      const authentication = CryptoJS.AES.encrypt(`${administrationAccount.uidAdministrationAccount}?${req.body.password}`, process.env.PASSPHRASE).toString();
+      const authorization = CryptoJS.AES.encrypt(`${administrationAccount.uidAdministrationAccount}`, process.env.PASSPHRASE).toString();
+
+      await LogsCreator(null, administrationAccount.uidAdministrationAccount, 'Administration Account Login', 'success', 'This administration account target successfully logged in!');
+
+      return res.json({
+        status: 'success',
+        data: {
+          username: administrationAccount.username,
+          role: administrationAccount.role,
+          token: `${authentication}~${authorization}`,
+        },
+      });
     });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Administration account not found!',
-    });
-  }
-
-  const isValidPassword = await bcrypt.compare(req.body.password, administrationAccount.password);
-
-  if (!isValidPassword) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Login',
-      status: 'error',
-      message: `Password not match with this account! (target: ${req.body.username})`,
-    });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Password not match with this account!',
-    });
-  }
-
-  if (administrationAccount.status === 'inactive') {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Auto Login',
-      status: 'error',
-      message: `This account on inactive status! (target: ${Head})`,
-    });
-
-    return res.status(403).json({
-      status: 'error',
-      message: 'This account on inactive status!',
-    });
-  }
-
-  if (administrationAccount.loggedIn) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Login',
-      status: 'error',
-      message: `This account already logged in on another device! (target: ${req.body.username})`,
-    });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'This account already logged in on another device!',
-    });
-  }
-
-  const updateLastUpdate = await administrationAccount.update({
-    lastUpdate: administrationAccount.updatedAt,
-  })
-
-  if (!updateLastUpdate) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Login',
-      status: 'error',
-      message: `Failed update last update on this account! (target: ${Head})`,
-    });
+  } catch (error) {
+    await LogsCreator(null, null, 'Administration Account Login', 'error', error.message);
 
     return res.status(409).json({
       status: 'error',
-      message: 'Failed update last update on this account!!',
+      message: error.message,
     });
   }
-
-  await administrationAccount.update({
-    loggedIn: true,
-  });
-
-  await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-    action: 'Login',
-    status: 'success',
-    message: `Login success! (target: ${req.body.username})`,
-  });
-
-  return res.json({
-    status: 'success',
-    data: {
-      username: administrationAccount.username,
-      role: administrationAccount.role,
-    },
-  });
 };

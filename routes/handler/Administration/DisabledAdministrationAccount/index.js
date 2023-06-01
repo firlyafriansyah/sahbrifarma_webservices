@@ -1,54 +1,73 @@
-const { AdministrationAccount, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { AdministrationAccount, LoginStatus, sequelize } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
 
-  const administrationAccount = await AdministrationAccount.findOne({
-    where: { uid },
-  });
+  const { authorization } = req.headers;
+  const { User } = Decryptor(authorization);
 
-  if (!administrationAccount) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Disabled Administration Account',
-      status: 'error',
-      message: `Administration account not found! (target: ${uid})`,
+  try {
+    return await sequelize.transaction(async (t) => {
+      const administrationAccount = await AdministrationAccount.findOne({
+        where: { uidAdministrationAccount: uid },
+      }, { transaction: t, lock: true });
+
+      if (!administrationAccount) {
+        throw new Error('This administration target not found!');
+      }
+
+      if (administrationAccount.role === 'super-admin') {
+        throw new Error('Can\'t disabled administration account with super admin role!');
+      }
+
+      const loginStatus = await LoginStatus.findOne({
+        where: { uidAdministrationAccount: administrationAccount.uidAdministrationAccount },
+      }, { transaction: t, lock: true });
+
+      if (!loginStatus) {
+        throw new Error('This administration account target doesn\'t have login status!');
+      }
+
+      if (administrationAccount.status === 'inactive') {
+        throw new Error('This administration account target already has an inactive status!');
+      }
+
+      const disabledAdministrationAccount = await administrationAccount.update({
+        status: 'inactive',
+      }, { transaction: t, lock: true });
+
+      if (!disabledAdministrationAccount) {
+        throw new Error('Disabled this administration account target failed!');
+      }
+
+      const updateLoginStatus = await loginStatus.update({
+        loggedIn: false,
+      }, { transaction: t, lock: true });
+
+      if (!updateLoginStatus) {
+        throw new Error('Updated login status for this administration account target failed!');
+      }
+
+      await LogsCreator(
+        User,
+        uid,
+        'Disabled Administration Account',
+        'success',
+        'Successfully disabled this administration account target!',
+      );
+
+      return res.json({
+        status: 'success',
+        message: 'Successfully disabled this administration account target!',
+      });
     });
+  } catch (error) {
+    await LogsCreator(User, uid, 'Disabled Administration Account', 'error', error.message);
 
-    return res.status(404).json({
+    return res.status(409).json({
       status: 'error',
-      message: 'Administration account not found!',
+      message: error.message,
     });
   }
-
-  const disabledAdministrationAccount = await administrationAccount.update({
-    status: 'inactive',
-  });
-
-  if (!disabledAdministrationAccount) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Disabled Administration Account',
-      status: 'error',
-      message: `Disabled administration account failed! (target: ${uid})`,
-    });
-
-    return res.status(403).json({
-      status: 'error',
-      message: 'Disabled administration account failed!',
-    });
-  }
-
-  await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-    action: 'Disabled Administration Account',
-    status: 'success',
-    message: `Administration account succesfully disabled! (target: ${uid})`,
-  });
-
-  return res.json({
-    status: 'success',
-    message: 'Administration account succesfully disabled!',
-  });
 };

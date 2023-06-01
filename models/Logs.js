@@ -1,18 +1,22 @@
 module.exports = (sequelize, DataTypes) => {
   const Logs = sequelize.define('Logs', {
-    uid: {
+    uid_logs: {
+      field: 'uid_logs',
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false,
     },
-    administrationAccount: {
-      field: 'administration_account',
-      type: DataTypes.STRING,
-      allowNull: false,
+    uidExecutor: {
+      field: 'uid_executor',
+      type: DataTypes.STRING(20),
+    },
+    uidTarget: {
+      field: 'uid_target',
+      type: DataTypes.STRING(20),
     },
     action: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
     status: {
@@ -21,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     message: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT('long'),
       allowNull: false,
     },
     createdAt: {

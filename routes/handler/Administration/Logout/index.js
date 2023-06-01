@@ -1,68 +1,55 @@
-const { AdministrationAccount, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { AdministrationAccount, LoginStatus, sequelize } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
   const { uid } = req.params;
 
-  const administrationAccount = await AdministrationAccount.findOne({
-    where: { uid },
-  });
+  const { authorization } = req.headers;
+  const { User } = Decryptor(authorization);
 
-  if (!administrationAccount) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Logout',
-      status: 'error',
-      message: `Administration account with this uid not found! (target: ${uid})`,
+  try {
+    return await sequelize.transaction(async (t) => {
+      const administrationAccount = await AdministrationAccount.findOne({
+        where: { uidAdministrationAccount: uid },
+      }, { transaction: t, lock: true });
+
+      if (!administrationAccount) {
+        throw new Error('This administration account target not found!');
+      }
+
+      const loginStatus = await LoginStatus.findOne({
+        where: { uidAdministrationAccount: administrationAccount.uidAdministrationAccount },
+      }, { transaction: t, lock: true });
+
+      if (!loginStatus) {
+        throw new Error('This administration account target doesn\'t have login status!');
+      }
+
+      if (!loginStatus.loggedIn) {
+        throw new Error('This administration account target isn\'t logged in on any device!');
+      }
+
+      const updateLoginStatus = await loginStatus.update({
+        loggedIn: false,
+      }, { transaction: t, lock: true });
+
+      if (!updateLoginStatus) {
+        throw new Error('Faield updated login status for this administration account target!');
+      }
+
+      await LogsCreator(User, uid, 'Logout', 'success', 'This administration account successfully logout!');
+
+      return res.json({
+        status: 'success',
+        message: 'This administration account successfully logout!',
+      });
     });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Administration account with this uid not found!',
-    });
-  }
-
-  if (!administrationAccount.loggedIn) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Logout',
-      status: 'error',
-      message: `This administration account is'nt logged in on any device! (target: ${uid})`,
-    });
-
-    return res.status(406).json({
-      status: 'error',
-      message: 'This administration account is\'nt logged in on any device!',
-    });
-  }
-
-  const updateAdministrationAccount = await administrationAccount.update({
-    loggedIn: false,
-  });
-
-  if (!updateAdministrationAccount) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Logout',
-      status: 'error',
-      message: `Update administration account logged in failed! (target: ${uid})`,
-    });
+  } catch (error) {
+    await LogsCreator(User, uid, 'Logout', 'error', error.message);
 
     return res.status(409).json({
       status: 'error',
-      message: 'Update administration account logged in failed!',
+      message: error.message,
     });
   }
-
-  await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-    action: 'Logout',
-    status: 'success',
-    message: `Logout from this administration account success! (target: ${uid})`,
-  });
-
-  return res.json({
-    status: 'success',
-    message: 'Logout from this administration account success!',
-  });
 };

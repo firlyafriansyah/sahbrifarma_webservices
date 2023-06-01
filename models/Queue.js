@@ -1,6 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Queue = sequelize.define('Queue', {
-    uid: {
+    uidQueue: {
+      field: 'uid_queue',
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
@@ -8,17 +9,23 @@ module.exports = (sequelize, DataTypes) => {
     },
     uidPatient: {
       field: 'uid_patient',
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(14),
       allowNull: false,
     },
     patientName: {
       field: 'patient_name',
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     status: {
       type: DataTypes.ENUM,
       values: ['in_medical_test_queue', 'in_doctoral_consultation_queue', 'in_pharmacist_queue', 'out_of_queue'],
+      allowNull: false,
+      defaultValue: 'out_of_queue',
+    },
+    sex: {
+      type: DataTypes.ENUM,
+      values: ['Laki - Laki', 'Perempuan'],
       allowNull: false,
     },
     createdAt: {

@@ -1,13 +1,14 @@
 module.exports = (sequelize, DataTypes) => {
   const AdministrationAccount = sequelize.define('AdministrationAccount', {
-    uid: {
+    uidAdministrationAccount: {
+      field: 'uid_administration_account',
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
     username: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(20),
       allowNull: false,
     },
     password: {
@@ -19,19 +20,24 @@ module.exports = (sequelize, DataTypes) => {
       values: ['super-admin', 'frontdesk', 'nurse', 'doctor', 'pharmacist'],
       allowNull: false,
     },
-    loggedIn: {
-      field: 'logged_in',
-      type: DataTypes.BOOLEAN,
+    fullname: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+    },
+    date_of_birth: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    sex: {
+      type: DataTypes.ENUM,
+      values: ['Laki - Laki', 'Perempuan'],
       allowNull: false,
     },
     status: {
       type: DataTypes.ENUM,
       values: ['active', 'inactive'],
+      defaultValue: 'active',
       allowNull: false,
-    },
-    lastUpdate: {
-      field: 'last_update',
-      type: DataTypes.DATE,
     },
     createdAt: {
       field: 'created_at',

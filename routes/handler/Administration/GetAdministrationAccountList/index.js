@@ -1,33 +1,21 @@
 const { Op } = require('sequelize');
-const { AdministrationAccount, Logs } = require('../../../../models');
-const { Decryptor } = require('../../../../utils');
+const { AdministrationAccount } = require('../../../../models');
+const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
+  const { authorization } = req.headers;
+  const { User } = Decryptor(authorization);
+
   const administrationAccount = await AdministrationAccount.findAll({
     where: { role: { [Op.not]: 'super-admin' } },
-    attributes: ['username', 'role', ['updated_at', 'updatedAt'], ['last_update', 'lastUpdate']],
+    attributes: ['uid_administration_account', 'username', 'role', 'status', ['updated_at', 'updatedAt']],
   });
 
   if (!administrationAccount) {
-    await Logs.create({
-      administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-      action: 'Get All Administration Account',
-      status: 'error',
-      message: 'Administration account list not found!',
-    });
-
-    return res.status(404).json({
-      status: 'error',
-      message: 'Administration account list not found!',
-    });
+    await LogsCreator(User, null, 'Get Administration List', 'error', 'Administration account list not found!');
   }
 
-  await Logs.create({
-    administrationAccount: Decryptor(req.headers.authorization).Head || 'Guest',
-    action: 'Get All Administration Account',
-    status: 'success',
-    message: 'Get administration account list success!',
-  });
+  await LogsCreator(User, null, 'Get Administration List', 'success', 'Successfully get administration list!');
 
   return res.json({
     status: 'success',
