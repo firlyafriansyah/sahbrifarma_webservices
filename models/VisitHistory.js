@@ -1,35 +1,32 @@
 module.exports = (sequelize, DataTypes) => {
-  const DoctoralConsultation = sequelize.define('DoctoralConsultation', {
-    uidDoctoralConsultation: {
-      field: 'uid_doctoral_consultation',
+  const VisitHistory = sequelize.define('VisitHistory', {
+    uidVisitHistory: {
+      field: 'uid_visit_history',
       type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
       allowNull: false,
+      primaryKey: true,
+      autoIncrement: true,
     },
     uidPatient: {
       field: 'uid_patient',
       type: DataTypes.STRING(14),
       allowNull: false,
     },
-    allergies: {
-      type: DataTypes.STRING,
+    visitDate: {
+      field: 'visit_date',
+      type: DataTypes.DATEONLY,
+      allowNull: false,
     },
-    anamnesis: {
+    medicalType: {
+      field: 'medical_type',
       type: DataTypes.STRING,
       allowNull: false,
     },
-    diagnosis: {
-      type: DataTypes.STRING,
+    status: {
+      type: DataTypes.ENUM,
+      values: ['on_progress', 'canceled', 'finish'],
+      defaultValue: 'canceled',
       allowNull: false,
-    },
-    medicalTreatment: {
-      field: 'medical_treatment',
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    notes: {
-      type: DataTypes.TEXT('long'),
     },
     createdBy: {
       field: 'created_by',
@@ -47,9 +44,9 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
   }, {
-    tableName: 'doctoral_consultation',
+    tableName: 'visit_history',
     timestamps: true,
   });
 
-  return DoctoralConsultation;
+  return VisitHistory;
 };
