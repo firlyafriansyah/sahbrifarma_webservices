@@ -29,6 +29,10 @@ module.exports = {
         values: ['Laki - Laki', 'Perempuan'],
         allowNull: false,
       },
+      created_by: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,

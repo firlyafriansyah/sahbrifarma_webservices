@@ -1,4 +1,4 @@
-const { DoctoralConsultation, sequelize } = require('../../../../models');
+const { DoctoralConsultation, AdministrationAccount, sequelize } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
@@ -6,11 +6,19 @@ module.exports = async (req, res) => {
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);
   const {
-    allergies, anamnesis, diagnosis, notes,
+    allergies, anamnesis, diagnosis, medicalTreatment, notes,
   } = req.body;
 
   try {
     return await sequelize.transaction(async (t) => {
+      const administrationAccount = await AdministrationAccount.findOne({
+        where: { uidAdministrationAccount: User },
+      });
+
+      if (!administrationAccount) {
+        throw new Error('This administration account not found!');
+      }
+
       const doctoralConsultation = await DoctoralConsultation.findOne({
         where: { uidDoctoralConsultation: uid },
       }, { transaction: t, lock: true });
@@ -23,7 +31,9 @@ module.exports = async (req, res) => {
         allergies,
         anamnesis,
         diagnosis,
+        medicalTreatment,
         notes,
+        createdBy: administrationAccount.fullname,
       }, { transaction: t, lock: true });
 
       if (!updateDoctoralConsultation) {
@@ -34,7 +44,7 @@ module.exports = async (req, res) => {
 
       return res.json({
         status: 'success',
-        data: updateDoctoralConsultation,
+        message: 'Successfully updated this doctoral consultation target!',
       });
     });
   } catch (error) {

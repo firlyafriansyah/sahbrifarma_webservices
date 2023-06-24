@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
 
         return res.json({
           status: 'success',
-          message: 'Successfully register this patient target!',
+          data: patient.uidPatient,
         });
       }).catch(async () => {
         throw new Error('Failed register this patient target!');

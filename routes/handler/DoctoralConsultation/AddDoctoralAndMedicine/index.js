@@ -1,6 +1,6 @@
 const Validator = require('fastest-validator');
 const {
-  Patient, DoctoralConsultation, Medicine, Queue, sequelize,
+  Patient, DoctoralConsultation, Medicine, Queue, AdministrationAccount, VisitHistory, sequelize,
 } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
@@ -11,18 +11,19 @@ module.exports = async (req, res) => {
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);
   const {
-    allergies, anamnesis, diagnosis, notes, medicine, preparation, dosage, rules,
+    allergies, anamnesis, diagnosis, medicalTreatment, notes, medicine, preparation, dosage, rules,
   } = req.body;
 
   const schema = {
     allergies: 'string|optional',
     anamnesis: 'string|empty:false',
     diagnosis: 'string|empty:false',
+    medicalTreatment: 'string|empty:false',
     notes: 'string|optional',
-    medicine: 'string|empty:false',
-    preparation: 'string|empty:false',
-    dosage: 'string|empty:false',
-    rules: 'string|empty:false',
+    medicine: 'string|optional',
+    preparation: 'string|optional',
+    dosage: 'string|optional',
+    rules: 'string|optional',
   };
 
   const validate = v.validate(req.body, schema);
@@ -36,12 +37,20 @@ module.exports = async (req, res) => {
 
   try {
     return await sequelize.transaction(async (t) => {
+      const administrationAccount = await AdministrationAccount.findOne({
+        where: { uidAdministrationAccount: User },
+      });
+
+      if (!administrationAccount) {
+        throw new Error('This administration account not found!');
+      }
+
       const patient = await Patient.findOne({
         where: { uidPatient },
       }, { transaction: t, lock: true });
 
       if (!patient) {
-        throw new Error('This patient target not found');
+        throw new Error('This patient target not found!');
       }
 
       const queue = await Queue.findOne({
@@ -49,7 +58,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!queue) {
-        throw new Error('Queue for this patient target not found');
+        throw new Error('Queue for this patient target not found!');
       }
 
       const createDoctoralConsultation = await DoctoralConsultation.create({
@@ -57,32 +66,61 @@ module.exports = async (req, res) => {
         allergies,
         anamnesis,
         diagnosis,
+        medicalTreatment,
         notes,
+        createdBy: administrationAccount.fullname,
       }, { transaction: t, lock: true });
 
       if (!createDoctoralConsultation) {
-        throw new Error('Failed create doctoral consultation for this patient target');
+        throw new Error('Failed create doctoral consultation for this patient target!');
       }
 
-      const createMedicineRequest = await Medicine.create({
-        uidPatient,
-        medicine,
-        preparation,
-        dosage,
-        rules,
-        status: 'requested',
-      }, { transaction: t, lock: true });
+      if (medicine || preparation || dosage || rules) {
+        const createMedicineRequest = await Medicine.create({
+          uidPatient,
+          medicine,
+          preparation,
+          dosage,
+          rules,
+          status: 'requested',
+          requestedBy: administrationAccount.fullname,
+        }, { transaction: t, lock: true });
 
-      if (!createMedicineRequest) {
-        throw new Error('Failed create medicine request for this patient target');
-      }
+        if (!createMedicineRequest) {
+          throw new Error('Failed create medicine request for this patient target!');
+        }
 
-      const updateQueue = queue.update({
-        status: 'in_pharmacist_queue',
-      });
+        const visitHistory = await VisitHistory.findOne({
+          where: { uidPatient },
+        }, { transaction: t, lock: true });
 
-      if (!updateQueue) {
-        throw new Error('Failed udpate queue for this patient target!');
+        if (!visitHistory) {
+          throw new Error('Visit history for this patient target not found!');
+        }
+
+        const updateVisitHistory = await visitHistory.update({
+          medicalType: 'Pemeriksaan Kesehatan, Beli Obat',
+        }, { transaction: t, lock: true });
+
+        if (!updateVisitHistory) {
+          throw new Error('Updated visit history for this patient target failed!');
+        }
+
+        const updateQueue = queue.update({
+          status: 'in_pharmacist_queue',
+        });
+
+        if (!updateQueue) {
+          throw new Error('Failed udpate queue for this patient target!');
+        }
+      } else {
+        const updateQueue = queue.update({
+          status: 'out_of_queue',
+        });
+
+        if (!updateQueue) {
+          throw new Error('Failed update queue for this patient target!');
+        }
       }
 
       await LogsCreator(User, uidPatient, 'Create Doctoral Consultation', 'success', 'Seccussfully created doctoral consultation for this patient target!');

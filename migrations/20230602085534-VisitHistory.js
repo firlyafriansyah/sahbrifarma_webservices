@@ -1,36 +1,29 @@
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('doctoral_consultation', {
-      uid_doctoral_consultation: {
+    await queryInterface.createTable('visit_history', {
+      uid_visit_history: {
         type: Sequelize.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
         allowNull: false,
+        primaryKey: true,
+        autoIncrement: true,
       },
       uid_patient: {
         type: Sequelize.STRING(14),
         allowNull: false,
       },
-      allergies: {
-        type: Sequelize.STRING,
+      visit_date: {
+        type: Sequelize.DATEONLY,
+        allowNull: false,
       },
-      anamnesis: {
+      medical_type: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      diagnosis: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      medical_treatment: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      notes: {
-        type: Sequelize.TEXT('long'),
-      },
-      created_by: {
-        type: Sequelize.STRING,
+      status: {
+        type: Sequelize.ENUM,
+        values: ['on_progress', 'canceled', 'finish'],
+        defaultValue: 'canceled',
         allowNull: false,
       },
       created_at: {
@@ -45,6 +38,6 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable('doctoral_consultation');
+    await queryInterface.dropTable('visit_history');
   },
 };

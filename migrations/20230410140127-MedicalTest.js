@@ -32,6 +32,10 @@ module.exports = {
       cholesterol: {
         type: Sequelize.FLOAT,
       },
+      created_by: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,

@@ -23,8 +23,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    medicalTreatment: {
+      field: 'medical_treatment',
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     notes: {
       type: DataTypes.TEXT('long'),
+    },
+    createdBy: {
+      field: 'created_by',
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     createdAt: {
       field: 'created_at',

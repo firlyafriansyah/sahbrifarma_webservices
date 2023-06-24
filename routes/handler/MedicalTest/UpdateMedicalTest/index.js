@@ -1,4 +1,4 @@
-const { MedicalTest, sequelize } = require('../../../../models');
+const { MedicalTest, AdministrationAccount, sequelize } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
@@ -11,6 +11,14 @@ module.exports = async (req, res) => {
 
   try {
     return await sequelize.transaction(async (t) => {
+      const administrationAccount = await AdministrationAccount.findOne({
+        where: { uidAdministrationAccount: User },
+      });
+
+      if (!administrationAccount) {
+        throw new Error('This administration account not found!');
+      }
+
       const medicalTest = await MedicalTest.findOne({
         where: { uidMedicalTest: uid },
       }, { transaction: t, lock: true });
@@ -27,6 +35,7 @@ module.exports = async (req, res) => {
         bloodSugar,
         uricAcid,
         cholesterol,
+        createdBy: AdministrationAccount.fullname,
       }, { transaction: t, lock: true });
 
       if (!updateMedicalTest) {
@@ -37,7 +46,7 @@ module.exports = async (req, res) => {
 
       return res.json({
         status: 'success',
-        data: updateMedicalTest,
+        message: 'Successfully updated medical test target!',
       });
     });
   } catch (error) {
