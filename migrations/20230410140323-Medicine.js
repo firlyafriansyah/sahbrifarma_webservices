@@ -32,9 +32,12 @@ module.exports = {
         values: ['requested', 'prepared', 'finished', 'canceled'],
         allowNull: false,
       },
-      created_by: {
+      requested_by: {
         type: Sequelize.STRING,
         allowNull: false,
+      },
+      created_by: {
+        type: Sequelize.STRING,
       },
       created_at: {
         type: Sequelize.DATE,

@@ -7,8 +7,7 @@ const Register = require('./Register');
 const UpdateAdministrationAccount = require('./UpdateAdministrationAccount');
 const SelfUpdateAdministrationAccount = require('./SelfUpdateAdministrationAccount');
 const AutoLogin = require('./AutoLogin');
-const DisabledAdministrationAccount = require('./DisabledAdministrationAccount');
-const ActivatedAdministrationAccount = require('./ActivatedAdministrationAccount');
+const UpdateAdministrationAccountStatus = require('./UpdateAdministrationAccountStatus');
 
 module.exports = {
   DeleteAdministrationAccount,
@@ -20,6 +19,5 @@ module.exports = {
   UpdateAdministrationAccount,
   SelfUpdateAdministrationAccount,
   AutoLogin,
-  DisabledAdministrationAccount,
-  ActivatedAdministrationAccount,
+  UpdateAdministrationAccountStatus,
 };

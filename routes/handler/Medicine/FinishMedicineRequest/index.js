@@ -1,5 +1,5 @@
 const {
-  sequelize, Medicine, Queue, Patient,
+  sequelize, Medicine, Queue, Patient, AdministrationAccount,
 } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
@@ -11,6 +11,14 @@ module.exports = async (req, res) => {
 
   try {
     return await sequelize.transaction(async (t) => {
+      const administrationAccount = await AdministrationAccount.findOne({
+        where: { uidAdministrationAccount: User },
+      });
+
+      if (!administrationAccount) {
+        throw new Error('This administration account not found!');
+      }
+
       const patient = await Patient.findOne({
         where: { uidPatient: uid },
       }, { transaction: t, lock: true });
@@ -41,6 +49,7 @@ module.exports = async (req, res) => {
 
       const updateMedicine = await medicine.update({
         status: 'finished',
+        preparedBy: administrationAccount.fullname,
       }, { transaction: t, lock: true });
 
       if (!updateMedicine) {

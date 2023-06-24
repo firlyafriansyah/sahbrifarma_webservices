@@ -1,6 +1,6 @@
 const Validator = require('fastest-validator');
 const {
-  Patient, MedicalTest, Queue, sequelize,
+  Patient, MedicalTest, Queue, AdministrationAccount, sequelize,
 } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
@@ -35,6 +35,14 @@ module.exports = async (req, res) => {
 
   try {
     return await sequelize.transaction(async (t) => {
+      const administrationAccount = await AdministrationAccount.findOne({
+        where: { uidAdministrationAccount: User },
+      });
+
+      if (!administrationAccount) {
+        throw new Error('This administration account not found!');
+      }
+
       const patient = await Patient.findOne({
         where: { uidPatient },
       }, { transaction: t, lock: true });
@@ -60,6 +68,7 @@ module.exports = async (req, res) => {
         bloodSugar,
         uricAcid,
         cholesterol,
+        createdBy: AdministrationAccount.fullname,
       }, { transaction: t, lock: true });
 
       if (!createMedicalTest) {

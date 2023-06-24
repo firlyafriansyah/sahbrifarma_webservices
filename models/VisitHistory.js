@@ -28,11 +28,6 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'canceled',
       allowNull: false,
     },
-    createdBy: {
-      field: 'created_by',
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     createdAt: {
       field: 'created_at',
       type: DataTypes.DATE,
