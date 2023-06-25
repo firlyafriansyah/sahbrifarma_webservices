@@ -8,19 +8,19 @@ module.exports = async (req, res) => {
   const { User } = Decryptor(authorization);
 
   const visitHistory = await VisitHistory.findAll({
-    where: { uidPatient },
+    where: { uidPatient, status: 'finish' },
   });
 
   if (!visitHistory) {
-    await LogsCreator(User, uidPatient, 'Get Visit History', 'error', 'Visit History for this patient target not found!');
+    await LogsCreator(User, uidPatient, 'Get Visit History', 'error', 'Riwayat kunjungan pasien tidak ditemukan!');
 
     return res.status(404).json({
       status: 'error',
-      message: 'Visit History for this patient target not found!',
+      message: 'Riwayat kunjungan pasien tidak ditemukan!',
     });
   }
 
-  await LogsCreator(User, uidPatient, 'Get Patient Detail', 'success', 'Successfully get visit history for this patient target!');
+  await LogsCreator(User, uidPatient, 'Get Patient Detail', 'success', 'Berhasil mengambil daftar riwayat kunjungan pasien!');
 
   return res.json({
     status: 'success',
