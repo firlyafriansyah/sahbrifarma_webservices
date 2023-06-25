@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
   const { User } = Decryptor(authorization);
 
   const visitHistory = await VisitHistory.findAll({
-    where: { uidPatient, status: 'finish' },
+    where: { uidPatient },
   });
 
   if (!visitHistory) {
