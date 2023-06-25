@@ -32,8 +32,6 @@ module.exports = async (req, res) => {
         where: { username: req.body.username },
       }, { transaction: t });
 
-	console.log(req.body);
-
       if (administrationAccount) {
         throw new Error('This username already used by another administration account!');
       }
@@ -69,7 +67,7 @@ module.exports = async (req, res) => {
         status: 'success',
         data: {
           username: createAdministrationAccount.username,
-	  fullname: createAdministrationAccount.fullname,
+          fullname: createAdministrationAccount.fullname,
           role: createAdministrationAccount.role,
           loggedIn: createLoginStatus.loggedIn,
           status: createLoginStatus.status,

@@ -1,5 +1,5 @@
 const {
-  sequelize, Medicine, Queue, Patient, AdministrationAccount,
+  sequelize, Medicine, Queue, Patient, AdministrationAccount, VisitHistory,
 } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
@@ -62,6 +62,22 @@ module.exports = async (req, res) => {
 
       if (!updateQueue) {
         throw new Error('Failed update queue for this patient target!');
+      }
+
+      const visitHistory = await VisitHistory.findOne({
+        where: { uidPatient: uid, status: 'on_progress' },
+      }, { transaction: t, lock: true });
+
+      if (!visitHistory) {
+        throw new Error('Visit history for this patient target not found!');
+      }
+
+      const updateVisitHistory = await visitHistory.update({
+        status: 'finish',
+      }, { transaction: t, lock: true });
+
+      if (!updateVisitHistory) {
+        throw new Error('Updated visit history for this patient target failed!');
       }
 
       await LogsCreator(User, uid, 'Finish Medicine Request', 'success', 'Successfully updated this medicine status target!');
