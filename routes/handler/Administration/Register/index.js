@@ -42,6 +42,9 @@ module.exports = async (req, res) => {
         username: req.body.username,
         password,
         role: req.body.role,
+        fullname: req.body.fullname,
+        dateOfBirth: req.body.dateOfBirth,
+        sex: req.body.sex,
         status: 'active',
       }, { transaction: t });
 
