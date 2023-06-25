@@ -14,6 +14,8 @@ module.exports = async (req, res) => {
         attributes: { exclude: ['password'] },
       }, { transaction: t, lock: true });
 
+	console.log(uid);
+
       if (!administrationAccount) {
         throw new Error('This administration account target not found!');
       }
