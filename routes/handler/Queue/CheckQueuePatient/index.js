@@ -13,14 +13,14 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (checkQueue.status !== 'out_of_queue') {
-        throw new Error('This patient target on queue list!');
+        throw new Error('Pasien ini sedang dalam antrean!');
       }
 
-      await LogsCreator(User, uidPatient, 'Check Queue', 'success', 'This patient target out of queue list!');
+      await LogsCreator(User, uidPatient, 'Check Queue', 'success', 'Pasien ini berada diluar antrean!');
 
       return res.json({
         status: 'success',
-        message: 'This patient target out of queue list!',
+        message: 'TPasien ini berada diluar antrean!',
       });
     });
   } catch (error) {
