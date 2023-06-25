@@ -90,21 +90,21 @@ module.exports = async (req, res) => {
           throw new Error('Failed create medicine request for this patient target!');
         }
 
-        const visitHistory = await VisitHistory.findOne({
-          where: { uidPatient },
-        }, { transaction: t, lock: true });
+//        const visitHistory = await VisitHistory.findOne({
+//        where: { uidPatient },
+//        }, { transaction: t, lock: true });
 
-        if (!visitHistory) {
-          throw new Error('Visit history for this patient target not found!');
-        }
+//        if (!visitHistory) {
+//          throw new Error('Visit history for this patient target not found!');
+//        }
 
-        const updateVisitHistory = await visitHistory.update({
-          medicalType: 'Pemeriksaan Kesehatan, Beli Obat',
-        }, { transaction: t, lock: true });
+//        const updateVisitHistory = await visitHistory.update({
+//          medicalType: 'Pemeriksaan Kesehatan, Beli Obat',
+//        }, { transaction: t, lock: true });
 
-        if (!updateVisitHistory) {
-          throw new Error('Updated visit history for this patient target failed!');
-        }
+//        if (!updateVisitHistory) {
+//          throw new Error('Updated visit history for this patient target failed!');
+//        }
 
         const updateQueue = queue.update({
           status: 'in_pharmacist_queue',

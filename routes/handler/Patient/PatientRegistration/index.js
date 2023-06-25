@@ -1,5 +1,5 @@
 const Validator = require('fastest-validator');
-const { Patient, Queue, sequelize } = require('../../../../models');
+const { Patient, Queue, sequelize, AdministrationAccount } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
 const v = new Validator();
@@ -28,6 +28,17 @@ module.exports = async (req, res) => {
   const DATE = new Date();
   const IDPasien = `${DATE.getFullYear()}${DATE.getMonth()}${DATE.getDate()}${DATE.getHours()}${DATE.getMinutes()}${DATE.getSeconds()}`;
 
+  const administrationAccount = await AdministrationAccount.findOne({
+    where: { uidAdministrationAccount: User },
+  });
+
+  if (!administrationAccount) {
+    return res.status(404).json({
+       status: 'error',
+       message: 'Administartion account not found!'
+    });
+  }
+
   const patientData = {
     uidPatient: IDPasien,
     name: req.body.nama_lengkap,
@@ -36,11 +47,13 @@ module.exports = async (req, res) => {
     emergencyPhoneNumber: req.body.nomor_telepon_darurat,
     dateOfBirth: req.body.tanggal_lahir,
     sex: req.body.jenis_kelamin,
+    createdBy: administrationAccount.fullname,
   };
 
   const queueData = {
     uidPatient: IDPasien,
     patientName: req.body.nama_lengkap,
+    sex: req.body.jenis_kelamin,
   };
 
   try {

@@ -68,7 +68,7 @@ module.exports = async (req, res) => {
         bloodSugar,
         uricAcid,
         cholesterol,
-        createdBy: AdministrationAccount.fullname,
+        createdBy: administrationAccount.fullname,
       }, { transaction: t, lock: true });
 
       if (!createMedicalTest) {
