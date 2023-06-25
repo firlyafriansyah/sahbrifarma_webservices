@@ -10,6 +10,7 @@ const queueRouter = require('./routes/Queue');
 const medicalTestRouter = require('./routes/MedicalTest');
 const doctoralConsultationRouter = require('./routes/DoctoralConsultation');
 const medicineRouter = require('./routes/Medicine');
+const visitHistoryRouter = require('./routes/VisitHistory');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/queue', queueRouter);
 app.use('/medical-test', medicalTestRouter);
 app.use('/doctoral-consultation', doctoralConsultationRouter);
 app.use('/medicine', medicineRouter);
+app.use('/visit-history', visitHistoryRouter);
 
 // #THIS FOR HEROKU PRODUCTION CONFIGURATION
 // const port = process.env.PORT || 8080;
