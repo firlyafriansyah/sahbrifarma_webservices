@@ -1,5 +1,5 @@
 const {
-  Queue, sequelize, AdministrationAccount, VisitHistory,
+  Queue, sequelize, VisitHistory,
 } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
@@ -11,14 +11,6 @@ module.exports = async (req, res) => {
 
   try {
     return await sequelize.transaction(async (t) => {
-      const administrationAccount = await AdministrationAccount.findOne({
-        where: { uidAdministrationAccount: User },
-      }, { transaction: t, lock: true });
-
-      if (!administrationAccount) {
-        throw new Error('This administration account not found!');
-      }
-
       const queue = await Queue.findOne({
         where: { uidPatient: uid },
       }, { transaction: t, lock: true });
@@ -39,7 +31,7 @@ module.exports = async (req, res) => {
         throw new Error('Failed update this patient queue target!');
       }
 
-      if (administrationAccount.role === 'frontdesk') {
+      if (currentStatus === 'out_of_queue') {
         const visitHistory = VisitHistory.create({
           uidPatient: uid,
           visitDate: new Date(),
