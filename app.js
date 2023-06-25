@@ -28,10 +28,10 @@ app.use('/doctoral-consultation', doctoralConsultationRouter);
 app.use('/medicine', medicineRouter);
 
 // #THIS FOR HEROKU PRODUCTION CONFIGURATION
-// const port = process.env.PORT || 8080;
-// app.listen(port, () => {
-//   console.log('Express server listening on port', port)
-// });
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+  console.log('Express server listening on port', port);
+});
 
 // #THIS FOR LOCAL DEVELOPMENT
-module.exports = app;
+// module.exports = app;
