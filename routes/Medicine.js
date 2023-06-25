@@ -12,6 +12,5 @@ router.get('/detail/:uid', middleware.PharmacistAuthorization, medicineHandler.G
 router.put('/update/:uid', middleware.DoctorAuthorization, medicineHandler.UpdateMedicine);
 router.put('/update-status/:uid&:currentStatus&:newStatus', middleware.PharmacistAuthorization, medicineHandler.UpdateMedicineStatus);
 router.put('/finish-request/:uid', middleware.PharmacistAuthorization, medicineHandler.FinishMedicineRequest);
-router.delete('/delete/:uid', middleware.SuperAuthorization, medicineHandler.DeleteMedicine);
 
 module.exports = router;

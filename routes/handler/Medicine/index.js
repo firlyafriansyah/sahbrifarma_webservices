@@ -1,4 +1,3 @@
-const DeleteMedicine = require('./DeleteMedicine');
 const GetMedicineDetail = require('./GetMedicineDetail');
 const GetMedicineList = require('./GetMedicineList');
 const GetMedicineRequest = require('./GetMedicineRequest');
@@ -8,7 +7,6 @@ const UpdateMedicineStatus = require('./UpdateMedicineStatus');
 const FinishMedicineRequest = require('./FinishMedicineRequest');
 
 module.exports = {
-  DeleteMedicine,
   GetMedicineDetail,
   GetMedicineList,
   GetMedicineRequest,
