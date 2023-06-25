@@ -12,7 +12,6 @@ module.exports = async (req, res) => {
 
   const schema = {
     username: 'string|empty:false',
-    password: 'string|min:6',
     role: { type: 'enum', values: ['frontdesk', 'nurse', 'doctor', 'pharmacist'] },
     fullname: 'string|empty:false',
     dateOfBirth: 'string|empty:false',
@@ -50,7 +49,11 @@ module.exports = async (req, res) => {
         throw new Error('This username already used by another administration account!');
       }
 
-      const password = await bcrypt.hash(req.body.password, 10);
+      let newPassword = administrationAccount.password;
+
+      if (req.body.password) {
+        newPassword = await bcrypt.hash(req.body.password, 10);
+      }
 
       if (
         req.body.fullname === administrationAccount.fullname
@@ -78,7 +81,7 @@ module.exports = async (req, res) => {
         fullname: req.body.fullname,
         dateOfBirth: req.body.dateOfBirth,
         sex: req.body.sex,
-        password,
+        newPassword,
         username: req.body.username,
         role: req.body.role,
         status: administrationAccount.status,

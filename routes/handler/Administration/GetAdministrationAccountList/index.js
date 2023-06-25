@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
 
   const administrationAccount = await AdministrationAccount.findAll({
     where: { role: { [Op.not]: 'super-admin' } },
-    attributes: ['uid_administration_account', 'username', 'role', 'status', ['updated_at', 'updatedAt']],
+    attributes: ['uid_administration_account', 'username', 'fullname', 'role', 'status', ['updated_at', 'updatedAt']],
   });
 
   if (!administrationAccount) {
