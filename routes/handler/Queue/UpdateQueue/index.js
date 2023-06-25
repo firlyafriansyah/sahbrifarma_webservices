@@ -16,11 +16,11 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!queue) {
-        throw new Error('This patient target not found!');
+        throw new Error('Pasien dengan id ini tidak ditemukan!');
       }
 
       if (queue.status !== currentStatus) {
-        throw new Error('This patient target queue has wrong current status!');
+        throw new Error('Status antrean pasien saat ini salah!');
       }
 
       const updateQueue = await queue.update({
@@ -28,27 +28,28 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateQueue) {
-        throw new Error('Failed update this patient queue target!');
+        throw new Error('Gagal melakukan update antrean!');
       }
 
       if (currentStatus === 'out_of_queue') {
+        console.log('test');
         const visitHistory = VisitHistory.create({
           uidPatient: uid,
           visitDate: new Date(),
           medicalType: newStatus === 'in_medical_test_queue' ? 'Medical Test' : 'Buy Medicine',
-          status: 'on_pregress',
+          status: 'on_progress',
         }, { transaction: t, lock: true });
 
         if (!visitHistory) {
-          throw new Error('Failed create visit history for this patient!');
+          throw new Error('Gagal membuat riwayat kunjungan untuk pasien!');
         }
       }
 
-      await LogsCreator(User, uid, 'Update Patient Queue', 'success', 'Successfully updated this patient queue target!');
+      await LogsCreator(User, uid, 'Update Patient Queue', 'success', 'Berhasil update antrean pasien!');
 
       return res.json({
         status: 'success',
-        message: 'Successfully updated this patient queue target!',
+        message: 'Berhasil update antrean pasien!',
       });
     });
   } catch (error) {
