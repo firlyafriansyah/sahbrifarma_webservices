@@ -2,13 +2,13 @@ const { VisitHistory } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
-  const { uidPatient } = req.params;
+  const { uidPatient, visitDate } = req.params;
 
   const { authorization } = req.headers;
   const { User } = Decryptor(authorization);
 
   const visitHistory = await VisitHistory.findAll({
-    where: { uidPatient },
+    where: { uidPatient, visitDate },
   });
 
   if (!visitHistory) {
