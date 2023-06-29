@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
   const { User } = Decryptor(authorization);
 
   const visitHistory = await VisitHistory.findAll({
-    where: { uidPatient, visitDate },
+    where: { uidPatient, visitDate: new Date(visitDate) },
   });
 
   if (!visitHistory) {
