@@ -14,10 +14,8 @@ module.exports = async (req, res) => {
         attributes: { exclude: ['password'] },
       }, { transaction: t, lock: true });
 
-	console.log(uid);
-
       if (!administrationAccount) {
-        throw new Error('This administration account target not found!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       const loginStatus = await LoginStatus.findOne({
@@ -26,15 +24,15 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!loginStatus) {
-        throw new Error('This administration account target doesn\'t have login status!');
+        throw new Error('Akun tidak memiliki status login!');
       }
 
-      await LogsCreator(User, uid, 'Get Administration Account', 'success', 'Successfully get this adminstration account target detail!');
+      await LogsCreator(User, uid, 'Get Administration Account', 'success', 'Detail akun berhasil didapatkan!');
 
       return res.json({
         status: 'success',
         administrationAccount,
-	loginStatus,
+        loginStatus,
       });
     });
   } catch (error) {

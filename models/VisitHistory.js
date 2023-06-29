@@ -12,6 +12,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(14),
       allowNull: false,
     },
+    uidMedicalType: {
+      field: 'uid_medical_type',
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     visitDate: {
       field: 'visit_date',
       type: DataTypes.DATEONLY,
@@ -19,13 +24,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     medicalType: {
       field: 'medical_type',
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    status: {
       type: DataTypes.ENUM,
-      values: ['on_progress', 'canceled', 'finish'],
-      defaultValue: 'canceled',
+      values: ['Periksa Kesehatan', 'Konsultasi Dan Periksa Kesehatan Lanjutan'],
+      defaultValue: 'Periksa Kesehatan',
       allowNull: false,
     },
     createdAt: {

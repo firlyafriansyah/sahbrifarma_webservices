@@ -1,5 +1,5 @@
 const {
-  sequelize, Medicine, Queue, Patient, AdministrationAccount, VisitHistory,
+  sequelize, Medicine, Queue, Patient, AdministrationAccount,
 } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
       });
 
       if (!administrationAccount) {
-        throw new Error('This administration account not found!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       const patient = await Patient.findOne({
@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!patient) {
-        throw new Error('This patient target not found!');
+        throw new Error('Pasien tidak ditemukan!');
       }
 
       const medicine = await Medicine.findOne({
@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!medicine) {
-        throw new Error('Medicine for this patient target not found!');
+        throw new Error('Permintaan obat tidak ditemukan!');
       }
 
       const queue = await Queue.findOne({
@@ -40,11 +40,11 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!queue) {
-        throw new Error('Queeu for this patient target not found!');
+        throw new Error('Pasien tidak dalam antrean!');
       }
 
       if (medicine.status !== 'requested') {
-        throw new Error('This medicine target status has wrong status!');
+        throw new Error('Status permintaan obat salah!');
       }
 
       const updateMedicine = await medicine.update({
@@ -53,7 +53,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateMedicine) {
-        throw new Error('Failed update this medicine status target!');
+        throw new Error('Update status permintaan obat gagal!');
       }
 
       const updateQueue = await queue.update({
@@ -61,30 +61,14 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateQueue) {
-        throw new Error('Failed update queue for this patient target!');
+        throw new Error('Update antrean pasien gagal!');
       }
 
-      const visitHistory = await VisitHistory.findOne({
-        where: { uidPatient: uid, status: 'on_progress' },
-      }, { transaction: t, lock: true });
-
-      if (!visitHistory) {
-        throw new Error('Visit history for this patient target not found!');
-      }
-
-      const updateVisitHistory = await visitHistory.update({
-        status: 'finish',
-      }, { transaction: t, lock: true });
-
-      if (!updateVisitHistory) {
-        throw new Error('Updated visit history for this patient target failed!');
-      }
-
-      await LogsCreator(User, uid, 'Finish Medicine Request', 'success', 'Successfully updated this medicine status target!');
+      await LogsCreator(User, uid, 'Finish Medicine Request', 'success', 'Update status permintaan obat berhasil!');
 
       return res.json({
         status: 'success',
-        message: 'Successfully updated this medicine status target!',
+        message: 'Update status permintaan obat berhasil!',
       });
     });
   } catch (error) {

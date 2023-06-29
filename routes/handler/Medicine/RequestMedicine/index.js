@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!patient) {
-        throw new Error('This patient target not found!');
+        throw new Error('Pasien tidak ditemukan!');
       }
 
       const checkMedicineRequest = await Medicine.findOne({
@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
       });
 
       if (checkMedicineRequest) {
-        throw new Error('This patient target already have requested medicine!');
+        throw new Error('Pasien masih memiliki permintaan obat!');
       }
 
       const requestedMedicine = await Medicine.create({
@@ -57,10 +57,10 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!requestedMedicine) {
-        throw new Error('Failed create medicine request for this patient target!');
+        throw new Error('Permintaan obat gagal dibuat!');
       }
 
-      await LogsCreator(User, uidPatient, 'Create Medicine Request', 'success', 'Successfully created medicine request for this patient target!');
+      await LogsCreator(User, uidPatient, 'Create Medicine Request', 'success', 'Permintaan obat berhasil dibuat!');
 
       return res.json({
         status: 'success',

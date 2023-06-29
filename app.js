@@ -29,11 +29,9 @@ app.use('/doctoral-consultation', doctoralConsultationRouter);
 app.use('/medicine', medicineRouter);
 app.use('/visit-history', visitHistoryRouter);
 
-// #THIS FOR HEROKU PRODUCTION CONFIGURATION
 // const port = process.env.PORT || 8080;
 // app.listen(port, () => {
 //   console.log('Express server listening on port', port);
 // });
 
-// #THIS FOR LOCAL DEVELOPMENT
 module.exports = app;

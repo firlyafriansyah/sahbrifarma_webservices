@@ -31,22 +31,18 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!administrationAccount) {
-        throw new Error('This administration account target not found!');
-      }
-
-      if (administrationAccount.role === 'super-admin') {
-        throw new Error('Can\'t change any information on administration account with role super admin!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       if (administrationAccount.fullname === req.body.fullname
           && administrationAccount.date_of_birth === req.body.dateOfBirth
           && administrationAccount.sex === req.body.sex
       ) {
-        await LogsCreator(User, uid, 'Self Update Administration Account', 'success', 'You doesn\'t change anything!');
+        await LogsCreator(User, uid, 'Self Update Administration Account', 'success', 'Tidak ada perubahan apapun!');
 
         return res.json({
           status: 'success',
-          message: 'You doesn\'t change anything!',
+          message: 'Tidak ada perubahan apapun!',
         });
       }
 
@@ -55,7 +51,7 @@ module.exports = async (req, res) => {
       });
 
       if (!loginStatus) {
-        throw new Error('This administration account target doesn\'t have login status!');
+        throw new Error('Akun tidak memiliki status login!');
       }
 
       const updateAdministrationAccount = await administrationAccount.update({
@@ -69,7 +65,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateAdministrationAccount) {
-        throw new Error('Failed updated this administration account target!');
+        throw new Error('Update akun gagal!');
       }
 
       const updateLoginStatus = await loginStatus.update({
@@ -78,10 +74,10 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateLoginStatus) {
-        throw new Error('Failed updated login status for this administration account target!');
+        throw new Error('Update akun gagal!');
       }
 
-      await LogsCreator(User, uid, 'Self Update Administration Account', 'success', 'This administration account target successfully updated!');
+      await LogsCreator(User, uid, 'Self Update Administration Account', 'success', 'Update akun berhasil');
 
       return res.json({
         status: 'success',

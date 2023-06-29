@@ -1,6 +1,6 @@
 const Validator = require('fastest-validator');
 const {
-  Patient, MedicalTest, Queue, AdministrationAccount, sequelize,
+  Patient, MedicalTest, Queue, AdministrationAccount, VisitHistory, sequelize,
 } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
       });
 
       if (!administrationAccount) {
-        throw new Error('This administration account not found!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       const patient = await Patient.findOne({
@@ -48,7 +48,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!patient) {
-        throw new Error('This patient target not found!');
+        throw new Error('Pasien tidak ditemukan!');
       }
 
       const queue = await Queue.findOne({
@@ -56,7 +56,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!queue) {
-        throw new Error('Queue for this patient target not found!');
+        throw new Error('Pasien tidak dalam antrean!');
       }
 
       const createMedicalTest = await MedicalTest.create({
@@ -72,7 +72,20 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!createMedicalTest) {
-        throw new Error('Failed create medical test for this patient target!');
+        throw new Error('Hasil periksa kesehatan gagal dibuat!');
+      }
+
+      const visitHistory = await VisitHistory.create({
+        where: {
+          uidPatient,
+          uidMedicalType: createMedicalTest.uidMedicalTest,
+          visitDate: new Date(),
+          medicalType: 'Periksa Kesehatan',
+        },
+      }, { transaction: t, lock: true });
+
+      if (!visitHistory) {
+        throw new Error('Riwayat kunjungan gagal dibuat!');
       }
 
       const updateQueue = queue.update({
@@ -80,14 +93,14 @@ module.exports = async (req, res) => {
       });
 
       if (!updateQueue) {
-        throw new Error('Failed udpate queue for this patient target!');
+        throw new Error('Update antrean pasien gagal!');
       }
 
-      await LogsCreator(User, uidPatient, 'Create Medical Test', 'success', 'Successfully created medical test for this patient target!');
+      await LogsCreator(User, uidPatient, 'Create Medical Test', 'success', 'Hasil periksa kesehatan berhasil dibuat!');
 
       return res.json({
         status: 'success',
-        message: 'Successfully created medical test for this patient target!',
+        message: 'Hasil periksa kesehatan berhasil dibuat!',
       });
     });
   } catch (error) {

@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!medicalTest) {
-        throw new Error('This medical test target not found!');
+        throw new Error('Hasil periksa kesehatan tidak ditemukan!');
       }
 
       const patient = await Patient.findOne({
@@ -23,10 +23,10 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!patient) {
-        throw new Error('Patient with this medical test target not found!');
+        throw new Error('Pasien tidak ditemukan!');
       }
 
-      await LogsCreator(User, uid, 'Get Medical Test Target', 'success', 'Successfully get medical test detail target!');
+      await LogsCreator(User, uid, 'Get Medical Test Target', 'success', 'Hasil periksa kesehatan berhasil di dapatkan!');
 
       return res.json({
         status: 'success',

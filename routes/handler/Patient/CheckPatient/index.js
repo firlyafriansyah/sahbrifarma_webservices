@@ -12,18 +12,18 @@ module.exports = async (req, res) => {
   });
 
   if (!patient) {
-    await LogsCreator(User, uidPatient, 'Check Patient', 'error', 'This patient target not found!');
+    await LogsCreator(User, uidPatient, 'Check Patient', 'error', 'Pasien tidak ditemukan!');
 
     return res.status(404).json({
       status: 'error',
-      message: 'This patient target not found!',
+      message: 'Pasien tidak ditemukan!',
     });
   }
 
-  await LogsCreator(User, uidPatient, 'Check Patient', 'success', 'Successfully check this patient target!');
+  await LogsCreator(User, uidPatient, 'Check Patient', 'success', 'Pasien ditemukan!');
 
   return res.json({
     status: 'success',
-    message: 'Successfully check this patient target!',
+    message: 'Pasien ditemukan!',
   });
 };

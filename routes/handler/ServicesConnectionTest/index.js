@@ -4,6 +4,6 @@ module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 's-max-age=1, stale-while-revalidate');
   res.json({
     status: 'success',
-    message: 'Service available',
+    message: 'Service hidup normal (stand by)',
   });
 };

@@ -12,18 +12,17 @@ module.exports = {
         type: Sequelize.STRING(14),
         allowNull: false,
       },
+      uid_medical_type: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
       visit_date: {
         type: Sequelize.DATEONLY,
         allowNull: false,
       },
       medical_type: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      status: {
         type: Sequelize.ENUM,
-        values: ['on_progress', 'canceled', 'finish'],
-        defaultValue: 'canceled',
+        values: ['Periksa Kesehatan', 'Konsultasi Dan Periksa Kesehatan Lanjutan'],
         allowNull: false,
       },
       created_at: {

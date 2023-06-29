@@ -13,11 +13,11 @@ module.exports = async (req, res) => {
       }, { lock: true, transaction: t });
 
       if (!administrationAccount) {
-        throw new Error('This administration account target not found!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       if (administrationAccount.role === 'super-admin') {
-        throw new Error('Can\'t delete administration account with role super admin!');
+        throw new Error('Akun dengan role Super Admin tidak dapat dihapus!');
       }
 
       const loginStatus = await LoginStatus.findOne({
@@ -25,13 +25,13 @@ module.exports = async (req, res) => {
       }, { lock: true, transaction: t });
 
       if (!loginStatus) {
-        throw new Error('This administration account target does\'t have login status!');
+        throw new Error('Akun tidak memiliki status login!');
       }
 
       const destroyLoginStatus = await loginStatus.destroy({ transaction: t, lock: true });
 
       if (!destroyLoginStatus) {
-        throw new Error('Deleted login status for this administration account target failed!');
+        throw new Error('Hapus akun gagal!');
       }
 
       const destroyAdministrationAccount = await administrationAccount.destroy({
@@ -40,13 +40,13 @@ module.exports = async (req, res) => {
       });
 
       if (!destroyAdministrationAccount) {
-        throw new Error('Deleted this administration account target failed!');
+        throw new Error('Hapus akun gagal!');
       }
 
-      await LogsCreator(User, uid, 'Delete Administration Account', 'error', 'This administration account target successfully deleted!');
+      await LogsCreator(User, uid, 'Delete Administration Account', 'error', 'Hapus akun berhasil!');
       return res.json({
         status: 'success',
-        message: 'This administration account target successfully deleted!',
+        message: 'Hapus akun berhasil!',
       });
     });
   } catch (error) {

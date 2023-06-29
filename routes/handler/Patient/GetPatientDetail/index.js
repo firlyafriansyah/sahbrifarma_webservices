@@ -13,15 +13,15 @@ module.exports = async (req, res) => {
   });
 
   if (!patient) {
-    await LogsCreator(User, uidPatient, 'Get Patient Detail', 'error', 'This patient target not found!');
+    await LogsCreator(User, uidPatient, 'Get Patient Detail', 'error', 'Pasien tidak ditemukan!');
 
     return res.status(404).json({
       status: 'error',
-      message: 'This patient target not found!',
+      message: 'Pasien tidak ditemukan!',
     });
   }
 
-  await LogsCreator(User, uidPatient, 'Get Patient Detail', 'success', 'Successfully get this patient detail target!');
+  await LogsCreator(User, uidPatient, 'Get Patient Detail', 'success', 'Detail pasien berhasil di dapatkan!');
 
   return res.json({
     status: 'success',

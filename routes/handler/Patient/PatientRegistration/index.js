@@ -1,5 +1,7 @@
 const Validator = require('fastest-validator');
-const { Patient, Queue, sequelize, AdministrationAccount } = require('../../../../models');
+const {
+  Patient, Queue, sequelize, AdministrationAccount,
+} = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
 const v = new Validator();
@@ -34,8 +36,8 @@ module.exports = async (req, res) => {
 
   if (!administrationAccount) {
     return res.status(404).json({
-       status: 'error',
-       message: 'Administartion account not found!'
+      status: 'error',
+      message: 'Akun tidak ditemukan!',
     });
   }
 
@@ -63,7 +65,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (checkExistingPatient) {
-        throw new Error('This patient target maybe already registered!');
+        throw new Error('Pasien ini sudah di daftarkan!');
       }
 
       const patient = await Patient.create(patientData, { transaction: t, lock: true });
@@ -72,14 +74,14 @@ module.exports = async (req, res) => {
       return Promise.all([
         patient, queue,
       ]).then(async () => {
-        await LogsCreator(User, null, 'Register Patient', 'success', 'Successfully registered this patient target!');
+        await LogsCreator(User, null, 'Register Patient', 'success', 'Pendaftaran pasien berhasil!');
 
         return res.json({
           status: 'success',
           data: patient.uidPatient,
         });
       }).catch(async () => {
-        throw new Error('Failed register this patient target!');
+        throw new Error('Pendaftaran pasien gagal!');
       });
     });
   } catch (error) {

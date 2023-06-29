@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!administrationAccount) {
-        throw new Error('Akun ini tidak ditemukan!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       const isValidPassword = await bcrypt.compare(
@@ -48,7 +48,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!loginStatus) {
-        throw new Error('Akun tidak memiliki login status!');
+        throw new Error('Akun tidak memiliki status login!');
       }
 
       if (loginStatus.loggedIn) {
@@ -61,13 +61,13 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateLoginStatus) {
-        throw new Error('Gagal update login status!');
+        throw new Error('Gagal update status login!');
       }
 
       const authentication = CryptoJS.AES.encrypt(`${administrationAccount.uidAdministrationAccount}?${req.body.password}`, process.env.PASSPHRASE).toString();
       const authorization = CryptoJS.AES.encrypt(`${administrationAccount.uidAdministrationAccount}`, process.env.PASSPHRASE).toString();
 
-      await LogsCreator(null, administrationAccount.uidAdministrationAccount, 'Administration Account Login', 'success', 'Berhasil login!');
+      await LogsCreator(null, administrationAccount.uidAdministrationAccount, 'Administration Account Login', 'success', 'Login berhasil!');
 
       return res.json({
         status: 'success',

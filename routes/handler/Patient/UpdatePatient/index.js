@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!patient) {
-        throw new Error('This patient target not found!');
+        throw new Error('Pasien tidak ditemukan!');
       }
 
       const patientData = {
@@ -57,17 +57,17 @@ module.exports = async (req, res) => {
       ) {
         return res.json({
           status: 'success',
-          message: 'Administration account data same with existing data!',
+          message: 'Tidak ada perubahan apapun!',
         });
       }
 
       const updatePatient = await patient.update(patientData, { transaction: t, lock: true });
 
       if (!updatePatient) {
-        throw new Error('Failed update this patient target!');
+        throw new Error('Update pasien gagal!');
       }
 
-      await LogsCreator(User, uidPatient, 'Update Patient', 'success', 'Successfully updated this patient target!');
+      await LogsCreator(User, uidPatient, 'Update Patient', 'success', 'Update pasien berhasil!');
 
       return res.json({
         status: 'success',

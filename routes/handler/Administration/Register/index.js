@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
       }, { transaction: t });
 
       if (administrationAccount) {
-        throw new Error('This username already used by another administration account!');
+        throw new Error('Username sudah digunakan oleh akun lain!');
       }
 
       const password = await bcrypt.hash(req.body.password, 10);
@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
       }, { transaction: t });
 
       if (!createAdministrationAccount) {
-        throw new Error('Failed registered this administration account!');
+        throw new Error('Registrasi akun gagal!');
       }
 
       const createLoginStatus = await LoginStatus.create({
@@ -58,10 +58,10 @@ module.exports = async (req, res) => {
       }, { transaction: t });
 
       if (!createLoginStatus) {
-        throw new Error('Failed create login status for this administration account!');
+        throw new Error('Status login gagal dibuat!');
       }
 
-      await LogsCreator(User, null, 'Register Administration Account', 'success', 'Successfully registered this administration account!');
+      await LogsCreator(User, null, 'Register Administration Account', 'success', 'Registrasi akun berhasil!');
 
       return res.json({
         status: 'success',

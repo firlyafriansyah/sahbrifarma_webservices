@@ -34,11 +34,11 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!administrationAccount) {
-        throw new Error('This administration account target not found!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       if (administrationAccount.role === 'super-admin') {
-        throw new Error('Can\'t change any information on administration account with role super admin!');
+        throw new Error('Akun dengan role Super Admin tidak bisa di perbaharui!');
       }
 
       const checkName = await AdministrationAccount.findOne({
@@ -46,7 +46,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (checkName && checkName.username !== administrationAccount.username) {
-        throw new Error('This username already used by another administration account!');
+        throw new Error('Username sudah digunakan oleh akun lain!');
       }
 
       let newPassword = administrationAccount.password;
@@ -65,7 +65,7 @@ module.exports = async (req, res) => {
       ) {
         return res.json({
           status: 'success',
-          message: 'Administration account data same with existing data!',
+          message: 'Tidak ada perubahan apapun!',
         });
       }
 
@@ -74,7 +74,7 @@ module.exports = async (req, res) => {
       });
 
       if (!loginStatus) {
-        throw new Error('This administration account target doesn\'t have login status!');
+        throw new Error('Akun tidak memilki status login!');
       }
 
       const updateAdministrationAccount = await administrationAccount.update({
@@ -88,7 +88,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateAdministrationAccount) {
-        throw new Error('Failed updated this administration account target!');
+        throw new Error('Update akun gagal!');
       }
 
       const updateLoginStatus = await loginStatus.update({
@@ -96,10 +96,10 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateLoginStatus) {
-        throw new Error('Failed updated this administration account target login status!');
+        throw new Error('Update status login gagal!');
       }
 
-      await LogsCreator(User, uid, 'Update Administration Account', 'success', 'This administration account target successfully updated!');
+      await LogsCreator(User, uid, 'Update Administration Account', 'success', 'Update akun berhasil!');
 
       return res.json({
         status: 'success',

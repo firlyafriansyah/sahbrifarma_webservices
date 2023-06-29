@@ -14,11 +14,11 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!medicine) {
-        throw new Error('This medicine target not found!');
+        throw new Error('Permintaan obat tidak ditemukan!');
       }
 
       if (medicine.status !== currentStatus) {
-        throw new Error('This medicine target status has wrong status!');
+        throw new Error('Status permintaan obat salah!');
       }
 
       const updateMedicine = await medicine.update({
@@ -26,10 +26,10 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateMedicine) {
-        throw new Error('Failed update this medicine status target!');
+        throw new Error('Update status permintaan obat gagal!');
       }
 
-      await LogsCreator(User, uid, 'Update Medicine Status', 'success', 'Successfully updated this medicine status target!');
+      await LogsCreator(User, uid, 'Update Medicine Status', 'success', 'Update status permintaan obat berhasil!');
 
       return res.json({
         status: 'success',

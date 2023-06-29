@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!administrationAccount) {
-        throw new Error('This administration account target not found!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       const loginStatus = await LoginStatus.findOne({
@@ -22,11 +22,11 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!loginStatus) {
-        throw new Error('This administration account target doesn\'t have login status!');
+        throw new Error('Akun tidak memiliki status login!');
       }
 
       if (!loginStatus.loggedIn) {
-        throw new Error('This administration account target isn\'t logged in on any device!');
+        throw new Error('Akun tidak sedang login di perangkat manapun!');
       }
 
       const updateLoginStatus = await loginStatus.update({
@@ -34,14 +34,14 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateLoginStatus) {
-        throw new Error('Faield updated login status for this administration account target!');
+        throw new Error('Update status login gagal!');
       }
 
-      await LogsCreator(User, uid, 'Logout', 'success', 'This administration account successfully logout!');
+      await LogsCreator(User, uid, 'Logout', 'success', 'Logout berhasil!');
 
       return res.json({
         status: 'success',
-        message: 'This administration account successfully logout!',
+        message: 'Logout berhasil!',
       });
     });
   } catch (error) {

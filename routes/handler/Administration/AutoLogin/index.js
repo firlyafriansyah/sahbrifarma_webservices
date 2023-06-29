@@ -7,11 +7,11 @@ module.exports = async (req, res) => {
   const { Uid, Pass } = Decryptor(authentication, 'authentication');
 
   if (!authentication) {
-    await LogsCreator(null, null, 'Auto Login', 'error', 'Authentication not found!');
+    await LogsCreator(null, null, 'Auto Login', 'error', 'Autentikasi tidak ditemukan!');
 
     return res.status(401).json({
       status: 'error',
-      message: 'Authentication not found!',
+      message: 'Autentikasi tidak ditemukan!',
     });
   }
 
@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!administrationAccount) {
-        throw new Error('This administration account not found!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       const isValidPassword = await bcrypt.compare(
@@ -31,11 +31,11 @@ module.exports = async (req, res) => {
       );
 
       if (!isValidPassword) {
-        throw new Error('Password not match with this administration account target!');
+        throw new Error('Password salah!');
       }
 
       if (administrationAccount.status === 'inactive') {
-        throw new Error('This administration account status is inactive!');
+        throw new Error('Akun tidak aktif!');
       }
 
       const loginStatus = await LoginStatus.findOne({
@@ -43,15 +43,15 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!loginStatus) {
-        throw new Error('This administration account doesn\'t have login status!');
+        throw new Error('Akun tidak memiliki status login!');
       }
 
       if (!loginStatus.loggedIn) {
-        throw new Error('This administration account isn\'t currently logged in on any device!');
+        throw new Error('Akun sedang login di perangkat lain!');
       }
 
       if (administrationAccount.updatedAt.toString() !== loginStatus.lastUpdate.toString()) {
-        throw new Error('This administration account recently updated, please re-login!');
+        throw new Error('Akun baru saja di perbaharui, silahkan login ulang!');
       }
 
       const updatedLoginStatus = await loginStatus.update({
@@ -59,14 +59,14 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updatedLoginStatus) {
-        throw new Error('Updated login status for this administration account failed!');
+        throw new Error('Update login status gagal!');
       }
 
-      await LogsCreator(null, Uid, 'Auto Login', 'success', 'This administration account successfully login with auto login!');
+      await LogsCreator(null, Uid, 'Auto Login', 'success', 'Akun berhasil login dengan auto login!');
 
       return res.json({
         status: 'success',
-        message: 'This administration account successfully login with auto login!',
+        message: 'Akun berhasil login dengan auto login!',
       });
     });
   } catch (error) {

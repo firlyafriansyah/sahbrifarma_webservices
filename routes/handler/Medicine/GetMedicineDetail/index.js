@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!medicine) {
-        throw new Error('This medicine target not found!');
+        throw new Error('Permintaan obat tidak ditemukan!');
       }
 
       const patient = await Patient.findOne({
@@ -21,10 +21,10 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!patient) {
-        throw new Error('Pateint with this medicine target not found!');
+        throw new Error('Pasien tidak ditemukan!');
       }
 
-      await LogsCreator(User, uid, 'Get Medicine Detail', 'success', 'Successfully get medicine detail!');
+      await LogsCreator(User, uid, 'Get Medicine Detail', 'success', 'Detail permintaan obat berhasil di dapatkan!');
 
       return res.json({
         status: 'success',

@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!medicineTarget) {
-        throw new Error('This medicine target not found!');
+        throw new Error('Permintaan obat tidak ditemukan!');
       }
 
       const updateMedicine = await medicineTarget.update({
@@ -29,10 +29,10 @@ module.exports = async (req, res) => {
       });
 
       if (!updateMedicine) {
-        throw new Error('Failed update this medicine terget!');
+        throw new Error('Update permintaan obat gagal dibuat!');
       }
 
-      await LogsCreator(User, uid, 'Update Medicine', 'success', 'Successfully update this medicine target!');
+      await LogsCreator(User, uid, 'Update Medicine', 'success', 'Update permintaan obat berhasil dibuat!');
 
       return res.json({
         status: 'success',

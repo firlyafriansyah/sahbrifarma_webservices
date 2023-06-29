@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!administrationAccount) {
-        throw new Error('This adminstration account executor not found!');
+        throw new Error('Akun eksekutor tidak ditemukan!');
       }
 
       if (administrationAccount.role === 'frontdesk') {
@@ -38,10 +38,10 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!getQueueList || getQueueList.length <= 0) {
-        throw new Error('This queue list target not found!');
+        throw new Error('Daftar antrean tidak ditemukan!');
       }
 
-      await LogsCreator(User, null, 'Get Queue List', 'success', 'Successfully get queue list target!');
+      await LogsCreator(User, null, 'Get Queue List', 'success', 'Daftar antrean berhasil di dapatkan!');
 
       return res.json({
         status: 'success',

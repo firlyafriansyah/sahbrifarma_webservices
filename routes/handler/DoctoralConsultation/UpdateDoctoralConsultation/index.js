@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
       });
 
       if (!administrationAccount) {
-        throw new Error('This administration account not found!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       const doctoralConsultation = await DoctoralConsultation.findOne({
@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!doctoralConsultation) {
-        throw new Error('This doctoral consultation target not found!');
+        throw new Error('Hasil konsultasi dan periksa kesehatan lanjutan tidak ditemukan!');
       }
 
       const updateDoctoralConsultation = await doctoralConsultation.update({
@@ -37,14 +37,14 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateDoctoralConsultation) {
-        throw new Error('Failed update this doctoral consultation target!');
+        throw new Error('Update hasil konsultasi dan periksa kesehatan lanjutan gagal!');
       }
 
-      await LogsCreator(User, uid, ' Update Doctoral Cosultation', 'success', 'Successfully updated this doctoral consultation target!');
+      await LogsCreator(User, uid, ' Update Doctoral Cosultation', 'success', 'Updated hasil konsultasi dan periksa kesehatan lanjutan berhasil!');
 
       return res.json({
         status: 'success',
-        message: 'Successfully updated this doctoral consultation target!',
+        message: 'Updated hasil konsultasi dan periksa kesehatan lanjutan berhasil!',
       });
     });
   } catch (error) {

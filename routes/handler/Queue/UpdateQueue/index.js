@@ -1,6 +1,4 @@
-const {
-  Queue, sequelize, VisitHistory,
-} = require('../../../../models');
+const { Queue, sequelize } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
 module.exports = async (req, res) => {
@@ -16,11 +14,11 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!queue) {
-        throw new Error('Pasien dengan id ini tidak ditemukan!');
+        throw new Error('Pasien tidak ditemukan!');
       }
 
       if (queue.status !== currentStatus) {
-        throw new Error('Status antrean pasien saat ini salah!');
+        throw new Error('Status antrean pasien salah!');
       }
 
       const updateQueue = await queue.update({
@@ -28,28 +26,14 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateQueue) {
-        throw new Error('Gagal melakukan update antrean!');
+        throw new Error('Update antrean pasien gagal!');
       }
 
-      if (currentStatus === 'out_of_queue') {
-        console.log('test');
-        const visitHistory = VisitHistory.create({
-          uidPatient: uid,
-          visitDate: new Date(),
-          medicalType: newStatus === 'in_medical_test_queue' ? 'Medical Test' : 'Buy Medicine',
-          status: 'on_progress',
-        }, { transaction: t, lock: true });
-
-        if (!visitHistory) {
-          throw new Error('Gagal membuat riwayat kunjungan untuk pasien!');
-        }
-      }
-
-      await LogsCreator(User, uid, 'Update Patient Queue', 'success', 'Berhasil update antrean pasien!');
+      await LogsCreator(User, uid, 'Update Patient Queue', 'success', 'Update antrean pasien berhasil!');
 
       return res.json({
         status: 'success',
-        message: 'Berhasil update antrean pasien!',
+        message: 'Update antrean pasien berhasil!',
       });
     });
   } catch (error) {

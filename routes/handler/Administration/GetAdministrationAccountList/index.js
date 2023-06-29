@@ -12,10 +12,10 @@ module.exports = async (req, res) => {
   });
 
   if (!administrationAccount) {
-    await LogsCreator(User, null, 'Get Administration List', 'error', 'Administration account list not found!');
+    await LogsCreator(User, null, 'Get Administration List', 'error', 'Daftar akun administrasi tidak ditemukan!');
   }
 
-  await LogsCreator(User, null, 'Get Administration List', 'success', 'Successfully get administration list!');
+  await LogsCreator(User, null, 'Get Administration List', 'success', 'Daftar akun administrasi berhasil didapatkan!');
 
   return res.json({
     status: 'success',

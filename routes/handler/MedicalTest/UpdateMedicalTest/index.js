@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
       });
 
       if (!administrationAccount) {
-        throw new Error('This administration account not found!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       const medicalTest = await MedicalTest.findOne({
@@ -24,7 +24,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!medicalTest) {
-        throw new Error('This medical test target not found!');
+        throw new Error('Hasil periksa kesehatan tidak ditemukan!');
       }
 
       const updateMedicalTest = await medicalTest.update({
@@ -39,14 +39,14 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!updateMedicalTest) {
-        throw new Error('Failed update this medical test target!');
+        throw new Error('Update hasil periksa kesehatan gagal!');
       }
 
-      await LogsCreator(User, uid, 'Update Medical Test', 'success', 'Successfully updated medical test target!');
+      await LogsCreator(User, uid, 'Update Medical Test', 'success', 'Update hasil periksa kesehatan berhasil!');
 
       return res.json({
         status: 'success',
-        message: 'Successfully updated medical test target!',
+        message: 'Update hasil periksa kesehatan berhasil!',
       });
     });
   } catch (error) {

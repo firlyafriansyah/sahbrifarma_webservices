@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
       });
 
       if (!administrationAccount) {
-        throw new Error('This administration account not found!');
+        throw new Error('Akun tidak ditemukan!');
       }
 
       const patient = await Patient.findOne({
@@ -50,7 +50,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!patient) {
-        throw new Error('This patient target not found!');
+        throw new Error('Pasien tidak ditemukan!');
       }
 
       const queue = await Queue.findOne({
@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!queue) {
-        throw new Error('Queue for this patient target not found!');
+        throw new Error('Pasien tidak dalam antrean!');
       }
 
       const createDoctoralConsultation = await DoctoralConsultation.create({
@@ -72,7 +72,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!createDoctoralConsultation) {
-        throw new Error('Failed create doctoral consultation for this patient target!');
+        throw new Error('Hasil konsultasi dan periksa kesehatan lanjutan gagal dibuat!');
       }
 
       if (medicine || preparation || dosage || rules) {
@@ -87,23 +87,20 @@ module.exports = async (req, res) => {
         }, { transaction: t, lock: true });
 
         if (!createMedicineRequest) {
-          throw new Error('Failed create medicine request for this patient target!');
+          throw new Error('Permintaan obat gagal dibuat!');
         }
 
-        const visitHistory = await VisitHistory.findOne({
-          where: { uidPatient, status: 'on_progress' },
+        const visitHistory = await VisitHistory.create({
+          where: {
+            uidPatient,
+            uidMedicalType: createDoctoralConsultation.uidDoctoralConsultation,
+            visitDate: new Date(),
+            medicalType: 'Konsultasi Dan Periksa Kesehatan Lanjutan',
+          },
         }, { transaction: t, lock: true });
 
         if (!visitHistory) {
-          throw new Error('Visit history for this patient target not found!');
-        }
-
-        const updateVisitHistory = await visitHistory.update({
-          medicalType: 'Medical Test, Buy Medicine',
-        }, { transaction: t, lock: true });
-
-        if (!updateVisitHistory) {
-          throw new Error('Updated visit history for this patient target failed!');
+          throw new Error('Riwayat kunjungan gagal dibuat!');
         }
 
         const updateQueue = queue.update({
@@ -111,7 +108,7 @@ module.exports = async (req, res) => {
         });
 
         if (!updateQueue) {
-          throw new Error('Failed udpate queue for this patient target!');
+          throw new Error('Update antrean pasien gagal!');
         }
       } else {
         const updateQueue = queue.update({
@@ -119,15 +116,15 @@ module.exports = async (req, res) => {
         });
 
         if (!updateQueue) {
-          throw new Error('Failed update queue for this patient target!');
+          throw new Error('Update antrean pasien gagal!');
         }
       }
 
-      await LogsCreator(User, uidPatient, 'Create Doctoral Consultation', 'success', 'Seccussfully created doctoral consultation for this patient target!');
+      await LogsCreator(User, uidPatient, 'Create Doctoral Consultation', 'success', 'Hasil konsultasi dan periksa kesehatan lanjutan berhasil dibuat!');
 
       return res.json({
         status: 'success',
-        message: 'Seccussfully created doctoral consultation for this patient target!',
+        message: 'Hasil konsultasi dan periksa kesehatan lanjutan berhasil dibuat!',
       });
     });
   } catch (error) {

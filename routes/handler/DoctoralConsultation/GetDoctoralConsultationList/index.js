@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!patient) {
-        throw new Error('This patient target not found!');
+        throw new Error('Pasien tidak ditemukan!');
       }
 
       const doctoralConsultationList = await DoctoralConsultation.findAll({
@@ -24,10 +24,10 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!doctoralConsultationList || doctoralConsultationList.length <= 0) {
-        throw new Error('Doctoral consultation list for this patient target not found!');
+        throw new Error('Daftar hasil konsultasi dan periksa kesehatan lanjutan tidak ditemukan!');
       }
 
-      await LogsCreator(User, uidPatient, 'Get Doctoral Consultation List', 'success', 'Successfully get doctoral consultation list for this patient target!');
+      await LogsCreator(User, uidPatient, 'Get Doctoral Consultation List', 'success', 'Daftar hasil konsultasi dan periksa kesehatan lanjutan berhasil di dapatkan!');
 
       return res.json({
         status: 'success',

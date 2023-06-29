@@ -4,7 +4,6 @@ const GetPatientList = require('./GetPatientList');
 const PatientRegistration = require('./PatientRegistration');
 const UpdatePatient = require('./UpdatePatient');
 const CheckPatient = require('./CheckPatient');
-const GetPatientVisitHistory = require('./GetPatientVisitHistory');
 
 module.exports = {
   DeletePatient,
@@ -13,5 +12,4 @@ module.exports = {
   PatientRegistration,
   UpdatePatient,
   CheckPatient,
-  GetPatientVisitHistory,
 };

@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!doctoralConsultation) {
-        throw new Error('This doctoral consultation target not found!');
+        throw new Error('Hasil konsultasi dan periksa kesehatan lanjutan tidak ditemukan!');
       }
 
       const patient = await Patient.findOne({
@@ -23,10 +23,10 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!patient) {
-        throw new Error('Patient with this doctoral consultation target not found!');
+        throw new Error('Pasien tidak ditemukan!');
       }
 
-      await LogsCreator(User, uid, 'Get Doctoral Consultation Detail', 'success', 'Successfully get doctoral consultation target!');
+      await LogsCreator(User, uid, 'Get Doctoral Consultation Detail', 'success', 'Hasil konsultasi dan periksa kesehatan lanjutan berhasil di dapatkan!');
 
       return res.json({
         status: 'success',

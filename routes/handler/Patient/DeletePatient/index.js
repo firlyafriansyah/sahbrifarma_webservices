@@ -1,5 +1,5 @@
 const {
-  Patient, MedicalTest, Medicine, Queue, DoctoralConsultation, sequelize,
+  Patient, MedicalTest, Medicine, Queue, DoctoralConsultation, VisitHistory, sequelize,
 } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
@@ -16,22 +16,26 @@ module.exports = async (req, res) => {
       }, { transaction: t, lock: true });
 
       if (!patient) {
-        throw new Error('This patient target not found!');
+        throw new Error('Pasien tidak ditemukan!');
       }
 
       const doctoralConsultation = await DoctoralConsultation.findOne({
         where: { uidPatient },
       }, { transaction: t, lock: true });
 
-      const medicalTest = await MedicalTest.findOne({
+      const medicalTest = await MedicalTest.findAll({
         where: { uidPatient },
       }, { transaction: t, lock: true });
 
-      const medicine = await Medicine.findOne({
+      const medicine = await Medicine.findAll({
         where: { uidPatient },
       }, { transaction: t, lock: true });
 
-      const queue = await Queue.findOne({
+      const queue = await Queue.findAll({
+        where: { uidPatient },
+      }, { transaction: t, lock: true });
+
+      const visitHistory = await VisitHistory.findAll({
         where: { uidPatient },
       }, { transaction: t, lock: true });
 
@@ -59,13 +63,19 @@ module.exports = async (req, res) => {
         }, { transaction: t, lock: true });
       }
 
+      if (visitHistory) {
+        await VisitHistory.destroy({
+          where: { uidPatient },
+        }, { transaction: t, lock: true });
+      }
+
       await patient.destroy({ transaction: t, lock: true });
 
-      await LogsCreator(User, uidPatient, 'Delete Patient', 'success', 'Successfully deleted this patient target!');
+      await LogsCreator(User, uidPatient, 'Delete Patient', 'success', 'Hapus pasien berhasil!');
 
       return res.json({
         status: 'success',
-        message: 'Successfully deleted this patient target!',
+        message: 'Hapus pasien berhasil!',
       });
     });
   } catch (error) {
