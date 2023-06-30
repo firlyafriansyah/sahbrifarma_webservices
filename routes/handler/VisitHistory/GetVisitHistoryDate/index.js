@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
 
       const visitHistory = await VisitHistory.findAll({
         where: { uidPatient },
-        attributes: ['visitDate'],
+        attributes: [['visit_date', 'visitDate']],
       }, { transaction: t, lock: true });
 
       if (!visitHistory) {
