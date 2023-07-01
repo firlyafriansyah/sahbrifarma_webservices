@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
     medicalType: {
       field: 'medical_type',
       type: DataTypes.ENUM,
-      values: ['Periksa Kesehatan', 'Konsultasi Dan Periksa Kesehatan Lanjutan'],
+      values: ['Periksa Kesehatan', 'Konsultasi Dan Periksa Kesehatan Lanjutan', 'Beli Obat'],
       defaultValue: 'Periksa Kesehatan',
       allowNull: false,
     },

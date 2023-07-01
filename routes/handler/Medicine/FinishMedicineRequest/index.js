@@ -1,5 +1,5 @@
 const {
-  sequelize, Medicine, Queue, Patient, AdministrationAccount,
+  sequelize, Medicine, Queue, Patient, AdministrationAccount, VisitHistory,
 } = require('../../../../models');
 const { Decryptor, LogsCreator } = require('../../../../utils');
 
@@ -54,6 +54,17 @@ module.exports = async (req, res) => {
 
       if (!updateMedicine) {
         throw new Error('Update status permintaan obat gagal!');
+      }
+
+      const visitHistory = await VisitHistory.create({
+        uidPatient: patient.uidPatient,
+        uidMedicalType: medicine.uidMedicine,
+        visitDate: new Date(),
+        medicalType: 'Beli Obat',
+      }, { transaction: t, lock: true });
+
+      if (!visitHistory) {
+        throw new Error('Riwayat kunjungan gagal dibuat!');
       }
 
       const updateQueue = await queue.update({

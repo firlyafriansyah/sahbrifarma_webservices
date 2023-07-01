@@ -76,12 +76,10 @@ module.exports = async (req, res) => {
       }
 
       const visitHistory = await VisitHistory.create({
-        where: {
-          uidPatient,
-          uidMedicalType: createMedicalTest.uidMedicalTest,
-          visitDate: new Date(),
-          medicalType: 'Periksa Kesehatan',
-        },
+        uidPatient,
+        uidMedicalType: createMedicalTest.uidMedicalTest,
+        visitDate: new Date(),
+        medicalType: 'Periksa Kesehatan',
       }, { transaction: t, lock: true });
 
       if (!visitHistory) {

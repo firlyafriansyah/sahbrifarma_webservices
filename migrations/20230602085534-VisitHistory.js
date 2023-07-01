@@ -25,7 +25,7 @@ module.exports = {
       },
       medical_type: {
         type: Sequelize.ENUM,
-        values: ['Periksa Kesehatan', 'Konsultasi Dan Periksa Kesehatan Lanjutan'],
+        values: ['Periksa Kesehatan', 'Konsultasi Dan Periksa Kesehatan Lanjutan', 'Beli Obat'],
         allowNull: false,
       },
       created_at: {
