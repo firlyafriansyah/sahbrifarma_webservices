@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    uidMedicineRequest: {
+      field: 'uid_medicine_request',
+      type: DataTypes.INTEGER,
+    },
     visitDate: {
       field: 'visit_date',
       type: DataTypes.DATEONLY,

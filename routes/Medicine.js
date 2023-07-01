@@ -8,7 +8,7 @@ const medicineHandler = require('./handler/Medicine');
 router.post('/request/:uidPatient', middleware.DoctorAuthorization, medicineHandler.RequestMedicine);
 router.get('/:uidPatient', middleware.PharmacistAuthorization, medicineHandler.GetMedicineList);
 router.get('/request/:uidPatient', middleware.PharmacistAuthorization, medicineHandler.GetMedicineRequest);
-router.get('/detail/:uid', middleware.PharmacistAuthorization, medicineHandler.GetMedicineDetail);
+router.get('/detail/:uid', middleware.DoctorAuthorization, medicineHandler.GetMedicineDetail);
 router.put('/update/:uid', middleware.DoctorAuthorization, medicineHandler.UpdateMedicine);
 router.put('/update-status/:uid&:currentStatus&:newStatus', middleware.PharmacistAuthorization, medicineHandler.UpdateMedicineStatus);
 router.put('/finish-request/:uid', middleware.PharmacistAuthorization, medicineHandler.FinishMedicineRequest);

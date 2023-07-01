@@ -95,6 +95,7 @@ module.exports = async (req, res) => {
             uidPatient,
             uidMedicalType: createDoctoralConsultation.uidDoctoralConsultation,
             visitDate: new Date(),
+            uidMedicineRequest: createMedicineRequest.uidMedicine,
             medicalType: 'Konsultasi Dan Periksa Kesehatan Lanjutan',
           },
         }, { transaction: t, lock: true });
@@ -111,6 +112,20 @@ module.exports = async (req, res) => {
           throw new Error('Update antrean pasien gagal!');
         }
       } else {
+        const visitHistory = await VisitHistory.create({
+          where: {
+            uidPatient,
+            uidMedicalType: createDoctoralConsultation.uidDoctoralConsultation,
+            visitDate: new Date(),
+            uidMedicineRequest: null,
+            medicalType: 'Konsultasi Dan Periksa Kesehatan Lanjutan',
+          },
+        }, { transaction: t, lock: true });
+
+        if (!visitHistory) {
+          throw new Error('Riwayat kunjungan gagal dibuat!');
+        }
+
         const updateQueue = queue.update({
           status: 'out_of_queue',
         });

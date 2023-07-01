@@ -16,6 +16,9 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
       },
+      uid_medicine_request: {
+        type: Sequelize.INTEGER,
+      },
       visit_date: {
         type: Sequelize.DATEONLY,
         allowNull: false,
