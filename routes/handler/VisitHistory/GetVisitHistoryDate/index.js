@@ -22,10 +22,6 @@ module.exports = async (req, res) => {
         attributes: [['visit_date', 'visitDate']],
       }, { transaction: t, lock: true });
 
-      if (!visitHistory) {
-        throw new Error('Riwayat kunjungan pasien tidak ditemukan!!');
-      }
-
       await LogsCreator(User, null, 'Get Queue List', 'success', 'Daftar antrean berhasil di dapatkan!');
 
       return res.json({
