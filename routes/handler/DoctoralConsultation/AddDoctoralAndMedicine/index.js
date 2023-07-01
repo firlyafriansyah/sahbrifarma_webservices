@@ -91,13 +91,11 @@ module.exports = async (req, res) => {
         }
 
         const visitHistory = await VisitHistory.create({
-          where: {
-            uidPatient,
-            uidMedicalType: createDoctoralConsultation.uidDoctoralConsultation,
-            visitDate: new Date(),
-            uidMedicineRequest: createMedicineRequest.uidMedicine,
-            medicalType: 'Konsultasi Dan Periksa Kesehatan Lanjutan',
-          },
+          uidPatient,
+          uidMedicalType: createDoctoralConsultation.uidDoctoralConsultation,
+          visitDate: new Date(),
+          uidMedicineRequest: createMedicineRequest.uidMedicine,
+          medicalType: 'Konsultasi Dan Periksa Kesehatan Lanjutan',
         }, { transaction: t, lock: true });
 
         if (!visitHistory) {
@@ -113,13 +111,11 @@ module.exports = async (req, res) => {
         }
       } else {
         const visitHistory = await VisitHistory.create({
-          where: {
-            uidPatient,
-            uidMedicalType: createDoctoralConsultation.uidDoctoralConsultation,
-            visitDate: new Date(),
-            uidMedicineRequest: null,
-            medicalType: 'Konsultasi Dan Periksa Kesehatan Lanjutan',
-          },
+          uidPatient,
+          uidMedicalType: createDoctoralConsultation.uidDoctoralConsultation,
+          visitDate: new Date(),
+          uidMedicineRequest: null,
+          medicalType: 'Konsultasi Dan Periksa Kesehatan Lanjutan',
         }, { transaction: t, lock: true });
 
         if (!visitHistory) {
